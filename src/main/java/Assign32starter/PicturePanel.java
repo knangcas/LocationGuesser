@@ -164,8 +164,8 @@ public class PicturePanel extends JPanel {
    * @throws IOException - File error
    * @throws InvalidCoordinateException - Invalid coordinate attempted
    */
-  public void insertImage(ByteArrayInputStream image, int row, int col) throws IOException, InvalidCoordinateException {
-	  BufferedImage img = ImageIO.read(image);
+  public void insertImageI(int row, int col, ImageIcon image) throws IOException, InvalidCoordinateException {
+	  //BufferedImage img = ImageIO.read(image);
     // Check or invalid coordinates
     if (row < 0 || col < 0 || 
         row >= 0 && labels.length <= row || 
@@ -174,11 +174,11 @@ public class PicturePanel extends JPanel {
     }
     
       // create icon to display
-      ImageIcon icon = new ImageIcon(img); 
+
       // do we need to setup the dimensions of all the containers?
-      handleFirstImage(icon.getIconWidth(), icon.getIconHeight());
+      handleFirstImage(image.getIconWidth(), image.getIconHeight());
       // insert image
-      labels[row][col].setIcon(icon);
+      labels[row][col].setIcon(image);
 
   }
   

@@ -5,16 +5,14 @@ import java.awt.Dimension;
 import org.json.*;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+import java.awt.image.BufferedImage;
+import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.util.Base64;
 
-import javax.swing.JDialog;
-import javax.swing.WindowConstants;
+import javax.imageio.ImageIO;
+import javax.swing.*;
 
 /**
  * The ClientGui class is a GUI frontend that displays an image grid, an input text box,
@@ -37,7 +35,7 @@ import javax.swing.WindowConstants;
  * 
  */
 public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
-	JDialog frame;
+	JFrame frame;
 	PicturePanel picPanel;
 	OutputPanel outputPanel;
 	String currentMess;
@@ -47,9 +45,13 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 	ObjectOutputStream os;
 	BufferedReader bufferedReader;
 
+	DataInputStream in;
+
 	// TODO: SHOULD NOT BE HARDCODED change to spec
 	String host = "localhost";
 	int port = 9000;
+
+	int start = 0;
 
 	/**
 	 * Construct dialog
@@ -59,7 +61,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		this.host = host; 
 		this.port = port; 
 	
-		frame = new JDialog();
+		frame = new JFrame();
 		frame.setLayout(new GridBagLayout());
 		frame.setMinimumSize(new Dimension(500, 500));
 		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -84,23 +86,48 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		frame.add(outputPanel, c);
 
 		picPanel.newGame(1);
-		insertImage("img/Berlin1.png", 0, 0);
+		insertImage("img/ASU1.png", 0, 0);
 
 		open(); // opening server connection here
-		currentMess = "{'type': 'start'}"; // very initial start message for the connection
+		//currentMess = "{'type': 'start'}"; // very initial start message for the connection
+		JSONObject request = new JSONObject();
+		request.put("type", "start");
+		//request.put("type", "start");
+
+		os.writeObject(request.toString());
+		os.flush();
+
+
 		try {
-			os.writeObject(currentMess);
+			os.writeObject(request.toString());
+			os.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		String string = this.bufferedReader.readLine();
+		String i = (String) in.readUTF();
+
+		//byte[] responseBytes = NetworkUtils.Receive(in);
+		JSONObject res = new JSONObject(i);
+		System.out.println("Connection Successful");
+
+		ImageIcon ii = readImg(res);
+		outputPanel.appendOutput(res.getString("message"));
+		try {
+			picPanel.insertImageI(0, 0, ii);
+		}
+		catch (Exception e) {
+			e.printStackTrace();
+		}
+
+
+		//String string = this.bufferedReader.readLine();
 		System.out.println("Got a connection to server");
-		JSONObject json = new JSONObject(string);
-		outputPanel.appendOutput(json.getString("value")); // putting the message in the outputpanel
+		//JSONObject json = new JSONObject(string);
+		; // putting the message in the outputpanel
 
 		// reading out the image (abstracted here as just a string)
-		System.out.println("Pretend I got an image: " + json.getString("image"));
+		System.out.println("Pretend I got an image: ");
 		/// would put image in picture panel
 		close(); //closing the connection to server
 
@@ -113,10 +140,24 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 	 */
 	public void show(boolean makeModal) {
 		frame.pack();
-		frame.setModal(makeModal);
+		//frame.setModal(makeModal);
 		frame.setVisible(true);
 	}
 
+	private ImageIcon readImg(JSONObject jo) {
+		System.out.println("Your image");
+		Base64.Decoder decoder = Base64.getDecoder();
+		byte[] bytes = decoder.decode(jo.getString("data"));
+		ImageIcon icon = null;
+		try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
+			BufferedImage image = ImageIO.read(bais);
+			icon = new ImageIcon(image);
+		} catch (IOException e) {
+            e.printStackTrace();
+        }
+		return icon;
+
+	}
 	/**
 	 * Creates a new game and set the size of the grid 
 	 * @param dimension - the size of the grid will be dimension x dimension
@@ -171,10 +212,17 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		String input = outputPanel.getInputText();
 
 		// TODO evaluate the input from above and create a request for client. 
-
+			JSONObject test = new JSONObject();
 		// send request to server
+		if (start == 0) {
+			test.put("type", "start");
+		} else {
+			test.put("type", "input");
+		}
+		test.put("input", input);
+
 		try {
-			  os.writeObject("Blub"); // this will crash the server, since it is not a JSON and thus the server will not handle it. 
+			  os.writeObject(test.toString()); // this will crash the server, since it is not a JSON and thus the server will not handle it.
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -183,8 +231,8 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		// wait for an answer and handle accordingly
 		try {
 			System.out.println("Waiting on response");
-			String string = this.bufferedReader.readLine();
-			System.out.println(string);
+			//String string = this.bufferedReader.readLine();
+			//System.out.println(string);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -213,8 +261,11 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		// get output channel
 		this.out = sock.getOutputStream();
 		// create an object output writer (Java only)
+
+		this.in = new DataInputStream(sock.getInputStream());
+
 		this.os = new ObjectOutputStream(out);
-		this.bufferedReader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
+		//this.bufferedReader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
 	}
 	
@@ -234,7 +285,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 
 		try {
 			String host = "localhost";
-			int port = 8888;
+			int port = 9000;
 
 
 			ClientGui main = new ClientGui(host, port);
