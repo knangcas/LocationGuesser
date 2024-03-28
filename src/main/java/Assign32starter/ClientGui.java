@@ -205,24 +205,26 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 	@Override
 	public void submitClicked() {
 		try {
-		open(); // opening a server connection again
-		System.out.println("submit clicked ");
+			open(); // opening a server connection again
+			System.out.println("submit clicked ");
 
 		// Pulls the input box text
-		String input = outputPanel.getInputText();
+			String input = outputPanel.getInputText();
+			input = input.toLowerCase();
 
 		// TODO evaluate the input from above and create a request for client. 
-			JSONObject test = new JSONObject();
+			JSONObject send = new JSONObject();
 		// send request to server
-		if (start == 0) {
-			test.put("type", "start");
-		} else {
-			test.put("type", "input");
-		}
-		test.put("input", input);
+			if (start == 0) {
+			send.put("type", "start");
+			start++;
+			} else {
+				send.put("type", "input");
+			}
+			send.put("input", input);
 
 		try {
-			  os.writeObject(test.toString()); // this will crash the server, since it is not a JSON and thus the server will not handle it.
+			  os.writeObject(send.toString()); // this will crash the server, since it is not a JSON and thus the server will not handle it.
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -231,7 +233,10 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		// wait for an answer and handle accordingly
 		try {
 			System.out.println("Waiting on response");
-			//String string = this.bufferedReader.readLine();
+			String i = (String) in.readUTF();
+			JSONObject response = new JSONObject(i);
+			System.out.println("Got a response:" + response);
+			evaluateResponse(response);
 			//System.out.println(string);
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -241,6 +246,21 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+
+	private void evaluateResponse(JSONObject json) {
+		String type = json.getString("type");
+		if (type.equals("message")) {
+			//append msg
+		} else if (type.equals("image")) {
+			//display image
+		} else if (type.equals("leaderboards")) {
+			//display leaderboard
+		}
+
+
+
+
 	}
 
 	/**

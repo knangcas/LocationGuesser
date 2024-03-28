@@ -22,6 +22,8 @@ public class SockServer {
 	static Socket sock;
 	static DataOutputStream os;
 	static ObjectInputStream in;
+
+	int direction = 1;
 	public static void main (String args[]) {
 
 		try {
@@ -89,11 +91,30 @@ public class SockServer {
 
 					if (request.getString("type").equals("input")) {
 						//TODO
-						//next
-						//left
-						//right
-						//guess
-						//will be a method
+						JSONObject test = testField(request, "input", "input");
+						if (!test.getBoolean("ok")) {
+							response = noType(request);
+							writeOut(response);
+							continue;
+						}
+
+						String input = request.getString("input");
+
+						if (input.equals("left")) {
+							//stuff
+						} else if (input.equals("right")) {
+							//stuff
+						} else if (input.equals("next")) {
+							//stuff
+						} else if (input.equals("leaderboards")) {
+							//stuff
+						} else if (input.equals("start")) {
+							//stuff
+						} else {
+							//stuff
+						}
+
+
 					} else if (request.getString("type").equals("start")) {
 						if (!request.has("message")) {
 							System.out.println("Got a start!");
@@ -104,6 +125,8 @@ public class SockServer {
 						} else {
 							name = request.getString("message");
 							System.out.println(name);
+							response.put("type", "message");
+							response.put("message", "Hello " + name +" What would you like to do?");
 						}
 					} else if (request.getString("type").equals("Name")) {
 						//todo
