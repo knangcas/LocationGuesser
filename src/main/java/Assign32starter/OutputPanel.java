@@ -12,7 +12,7 @@ import javax.swing.*;
 /**
  * The output panel that includes an input box, a submit button, and an output
  * text area.
- * 
+ *
  * Methods of interest
  * ----------------------
  * getInputText() - Get the input text box text
@@ -23,17 +23,17 @@ import javax.swing.*;
 public class OutputPanel extends JPanel {
   // Needed because JPanel is Serializable
   private static final long serialVersionUID = 2L;
-  
+
 
   /**
    * Generic event handler for events generated in the panel GUI
-   * 
+   *
    * Uses Observer pattern
    */
   public interface EventHandlers {
     // Executes for every key press in the input textbox
     void inputUpdated(String input);
-    
+
     // executes when the submit button is clicked
     void submitClicked();
   }
@@ -61,9 +61,9 @@ public class OutputPanel extends JPanel {
 
     // Setup input text box
     GridBagConstraints c = new GridBagConstraints();
-    
 
-    
+
+
     c = new GridBagConstraints();
     c.fill = GridBagConstraints.HORIZONTAL;
     c.gridx = 0;
@@ -81,7 +81,7 @@ public class OutputPanel extends JPanel {
     cd.setHorizontalAlignment(JLabel.RIGHT);
     cdTimer();
     add(cd, c);
-    
+
 
     // c = new GridBagConstraints();
     // c.fill = GridBagConstraints.HORIZONTAL;
@@ -107,14 +107,14 @@ public class OutputPanel extends JPanel {
     });
     input.addActionListener(new ActionListener(){
 
-                public void actionPerformed(ActionEvent e){
+      public void actionPerformed(ActionEvent e){
 
-                        JTextField textField = (JTextField) e.getSource();
-                        for (EventHandlers handler : handlers) {
-                          handler.submitClicked();
-                        }
+        JTextField textField = (JTextField) e.getSource();
+        for (EventHandlers handler : handlers) {
+          handler.submitClicked();
+        }
 
-                }});
+      }});
     add(input, c);
 
     // Setup submit button
@@ -250,7 +250,7 @@ public class OutputPanel extends JPanel {
   public void addEventHandlers(EventHandlers handlerObj) {
     handlers.add(handlerObj);
   }
-  
+
   /**
    * Append a message to the output panel
    * @param message - the message to print

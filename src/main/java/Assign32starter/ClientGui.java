@@ -20,7 +20,7 @@ import javax.swing.*;
 /**
  * The ClientGui class is a GUI frontend that displays an image grid, an input text box,
  * a button, and a text area for status. 
- * 
+ *
  * Methods of Interest
  * ----------------------
  * show(boolean modal) - Shows the GUI frame with current state
@@ -31,11 +31,11 @@ import javax.swing.*;
  * insertImage(String filename, int row, int col) - Inserts an image into the grid
  * appendOutput(String message) - Appends text to the output panel
  * submitClicked() - Button handler for the submit button in the output panel
- * 
+ *
  * Notes
  * -----------
  * > Does not show when created. show() must be called to show he GUI.
- * 
+ *
  */
 public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 	JFrame frame;
@@ -66,12 +66,12 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 
 	/**
 	 * Construct dialog
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	public ClientGui(String host, int port) throws IOException {
-		this.host = host; 
-		this.port = port; 
-	
+		this.host = host;
+		this.port = port;
+
 		frame = new JFrame("Name the location!");
 		frame.getContentPane().setBackground(Color.BLACK);
 		frame.setLayout(new GridBagLayout());
@@ -259,7 +259,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 
 	/**
 	 * Insert an image into the grid at position (col, row)
-	 * 
+	 *
 	 * @param filename - filename relative to the root directory
 	 * @param row - the row to insert into
 	 * @param col - the column to insert into
@@ -287,7 +287,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 
 	/**
 	 * Submit button handling
-	 * 
+	 *
 	 * TODO: This is where your logic will go or where you will call appropriate methods you write. 
 	 * Right now this method opens and closes the connection after every interaction, if you want to keep that or not is up to you. 
 	 */
@@ -297,18 +297,18 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			open(); // opening a server connection again
 			System.out.println("submit clicked ");
 
-		// Pulls the input box text
+			// Pulls the input box text
 			String input = outputPanel.getInputText();
 			if (start > 0) {
 				input = input.toLowerCase();
 			}
-		// TODO evaluate the input from above and create a request for client. 
+			// TODO evaluate the input from above and create a request for client.
 			JSONObject send = new JSONObject();
-		// send request to server
+			// send request to server
 			if (start == 0) {
-			send.put("type", "start");
-			send.put("message", input);
-			start++;
+				send.put("type", "start");
+				send.put("message", input);
+				start++;
 			} else {
 				send.put("type", "input");
 			}
@@ -322,41 +322,41 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 				e.printStackTrace();
 			}
 			outputPanel.clearInputText();
-		String r;
+			String r;
 			JSONObject res;
 			JSONObject servReply;
-		try {
-			System.out.println("Waiting on response");
-			  int inLen = in.readInt();
-			  byte[] msg = new byte[inLen];
-			  in.readFully(msg, 0, msg.length);
-			  r = convertFromBytes(msg);
-			  System.out.println("got a response");
+			try {
+				System.out.println("Waiting on response");
+				int inLen = in.readInt();
+				byte[] msg = new byte[inLen];
+				in.readFully(msg, 0, msg.length);
+				r = convertFromBytes(msg);
+				System.out.println("got a response");
 
-			  outputPanel.clearInputText();
-			  res = new JSONObject(r);
-			if (!res.has("data")) {
-				System.out.println(res);
-			}
-			  servReply = Response.evaluateResponse(res, picPanel, outputPanel);
-			  score = Response.getScore();
+				outputPanel.clearInputText();
+				res = new JSONObject(r);
+				if (!res.has("data")) {
+					System.out.println(res);
+				}
+				servReply = Response.evaluateResponse(res, picPanel, outputPanel);
+				score = Response.getScore();
 
-			  if (servReply !=null) {
-				  System.out.println("auto reply to server");
-				  reply2Server(servReply);
+				if (servReply !=null) {
+					System.out.println("auto reply to server");
+					reply2Server(servReply);
 
-			  }
+				}
 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			} catch (PicturePanel.InvalidCoordinateException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+				throw new RuntimeException(e);
+			} catch (InterruptedException e) {
+				throw new RuntimeException(e);
+			}
 
-            // wait for an answer and handle accordingly
+			// wait for an answer and handle accordingly
 		/*try {
 			System.out.println("Waiting on response");
 			String i = (String) in.readUTF();
@@ -369,7 +369,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		}
 
 		 */
-		close();
+			close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -409,16 +409,16 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InterruptedException e) {
-            throw new RuntimeException(e);
-        }
+			throw new RuntimeException(e);
+		}
 
 
-    }
+	}
 
 
 	/**
 	 * Key listener for the input text box
-	 * 
+	 *
 	 * Change the behavior to whatever you need
 	 */
 	@Override
@@ -441,16 +441,16 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		//this.bufferedReader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
 	}
-	
+
 	public void close() {
-        try {
-            if (out != null)  out.close();
-            if (bufferedReader != null)   bufferedReader.close(); 
-            if (sock != null) sock.close();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+		try {
+			if (out != null)  out.close();
+			if (bufferedReader != null)   bufferedReader.close();
+			if (sock != null) sock.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
 
 	public static void main(String[] args) throws IOException {
 		// create the frame

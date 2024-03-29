@@ -163,65 +163,65 @@ public class SockServer {
 							response = fetchImage(currentAnswer[caIndex], direction, response);
 							System.out.println("Fetched new set of images. Answer: " + currentAnswer[caIndex]);
 						} else if (input.equals("gover!revog")) {
-								if (!request.has("score")) {
-										System.out.println("Acknowledging Game Over");
-										response.put("type", "ok");
-									} else {
-										//name = request.getString("name");
-									System.out.println("Storing score");
-										score = request.getInt("score");
-										if (leaderBoards.get(name) != null) {
-											if (score > Integer.parseInt(leaderBoards.get(name))) {
-												leaderBoards.put(name, String.valueOf(score));
-												writeJSON();
-												System.out.println("Updated leaders.json with new high score");
-											}
-										}
-										else {
-											leaderBoards.put(name, String.valueOf(score));
-											writeJSON();
-											System.out.println("Updating leaders.json");
-										}
-										previouslyPlayed = true;
-										response.put("type", "start2");
-										response.put("message", "Thanks for playing. Select an option");
+							if (!request.has("score")) {
+								System.out.println("Acknowledging Game Over");
+								response.put("type", "ok");
+							} else {
+								//name = request.getString("name");
+								System.out.println("Storing score");
+								score = request.getInt("score");
+								if (leaderBoards.get(name) != null) {
+									if (score > Integer.parseInt(leaderBoards.get(name))) {
+										leaderBoards.put(name, String.valueOf(score));
+										writeJSON();
+										System.out.println("Updated leaders.json with new high score");
 									}
+								}
+								else {
+									leaderBoards.put(name, String.valueOf(score));
+									writeJSON();
+									System.out.println("Updating leaders.json");
+								}
+								previouslyPlayed = true;
+								response.put("type", "start2");
+								response.put("message", "Thanks for playing. Select an option");
+							}
 						} else if (input.equals(currentAnswer[caIndex].toLowerCase())) {
-								nextIndex();
-								direction = 1;
-								response = fetchImage(currentAnswer[caIndex], direction, response);
-								response.put("type", "+1");
-								System.out.println("Fetched new set of images. Answer: " + currentAnswer[caIndex]);
+							nextIndex();
+							direction = 1;
+							response = fetchImage(currentAnswer[caIndex], direction, response);
+							response.put("type", "+1");
+							System.out.println("Fetched new set of images. Answer: " + currentAnswer[caIndex]);
 						} else {
 							response.put("type", "wrong guess");
 						}
 
 					} else if (request.getString("type").equals("input") && !gameStarted) {
-							String input = request.getString("input");
+						String input = request.getString("input");
 
-							if (input.equals("leaderboard")) {
-								response.put("type", "leaderboards");
-								JSONArray lbtop5 = getTop5lb();
-								response.put("data", lbtop5);
-								System.out.println("sending back top5 leaders");
-								System.out.println(lbtop5);
-							} else if (input.equals("start") && !previouslyPlayed) {
-								gameStarted = true;
-								response = fetchImage(currentAnswer[caIndex], 1, response);
-								response.put("type", "new game");
-							} else if (input.equals("new game") && previouslyPlayed) {
-								gameStarted = true;
-								response = fetchImage(currentAnswer[caIndex], 1, response);
-								response.put("type", "new game");
-							} else if (input.equals("quit")) {
-								response.put("type", "quit");
-								Thread.sleep(20000);
-								System.exit(0);
-							} else if (previouslyPlayed){
-								response.put("type", "notplayingCommands");
-							} else {
-								response.put("type", "notplayingCommandsIntro");
-							}
+						if (input.equals("leaderboard")) {
+							response.put("type", "leaderboards");
+							JSONArray lbtop5 = getTop5lb();
+							response.put("data", lbtop5);
+							System.out.println("sending back top5 leaders");
+							System.out.println(lbtop5);
+						} else if (input.equals("start") && !previouslyPlayed) {
+							gameStarted = true;
+							response = fetchImage(currentAnswer[caIndex], 1, response);
+							response.put("type", "new game");
+						} else if (input.equals("new game") && previouslyPlayed) {
+							gameStarted = true;
+							response = fetchImage(currentAnswer[caIndex], 1, response);
+							response.put("type", "new game");
+						} else if (input.equals("quit")) {
+							response.put("type", "quit");
+							Thread.sleep(20000);
+							System.exit(0);
+						} else if (previouslyPlayed){
+							response.put("type", "notplayingCommands");
+						} else {
+							response.put("type", "notplayingCommandsIntro");
+						}
 
 
 					} else if (request.getString("type").equals("start")) {
@@ -238,7 +238,7 @@ public class SockServer {
 							response.put("type", "start");
 							response.put("message", "Hello " + name +" What would you like to do?");
 							//if (!leaderBoards.containsKey(name)) {
-								//leaderBoards.put(name, String.valueOf(0));
+							//leaderBoards.put(name, String.valueOf(0));
 							//}
 						}
 					}  else {
