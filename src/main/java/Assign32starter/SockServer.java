@@ -1,5 +1,6 @@
 package Assign32starter;
 import java.net.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 import java.util.Set;
 import java.util.Stack;
@@ -10,6 +11,8 @@ import javax.swing.ImageIcon;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
+
+import com.google.gson.Gson;
 import org.json.*;
 
 
@@ -21,10 +24,18 @@ public class SockServer {
 	static Stack<String> imageSource = new Stack<String>();
 	static Socket sock;
 	static DataOutputStream os;
-	static ObjectInputStream in;
+	static InputStream in;
 
-	int direction = 1;
+	static int direction;
+
+	static String[] currentAnswer;
+
+	static int caIndex;
+
 	public static void main (String args[]) {
+		currentAnswer = new String[]{"ASU", "Berlin", "Paris"};
+		direction = 1;
+		caIndex = 1;
 
 		try {
 
@@ -45,13 +56,14 @@ public class SockServer {
 
 				// could totally use other input outpur streams here
 				OutputStream out = sock.getOutputStream();
+				DataOutputStream dos = new DataOutputStream(out);
 				System.out.println("after stream");
 
 				// create an object output writer (Java only)
-				os = new DataOutputStream(out);
+				//os = new DataOutputStream(out);
 
-				in = new ObjectInputStream(sock.getInputStream());
-
+				in = sock.getInputStream();
+				DataInputStream ds = new DataInputStream(in);
 
 				//byte[] messageBytes = NetworkUtils.Receive(in);
 				//String s = (String) in.readObject();
@@ -63,8 +75,16 @@ public class SockServer {
 
 				while (connected) {
 					String s = "";
+
 					try {
-						s = (String) in.readObject();
+						int inLen = ds.readInt();
+						if(inLen >0) {
+							byte[] message = new byte[inLen];
+							ds.readFully(message, 0, message.length);
+							s = convertFromBytes(message);
+
+						}
+						//s = (String) in.readObject();
 					} catch (Exception e) {
 						System.out.println("Client Disconnect");
 						connected = false;
@@ -78,7 +98,8 @@ public class SockServer {
 						writeOut(response);
 						continue;
 					}
-
+					System.out.println("Got a request");
+					System.out.println(s);
 					JSONObject request = new JSONObject(s);
 
 
@@ -101,17 +122,39 @@ public class SockServer {
 						String input = request.getString("input");
 
 						if (input.equals("left")) {
-							//stuff
+							if (direction != 1) {
+								response = fetchImage(currentAnswer[caIndex], direction - 1, response);
+								direction--;
+							} else {
+								response = fetchImage(currentAnswer[caIndex], direction + 3, response);
+								direction+=3;
+							}
 						} else if (input.equals("right")) {
-							//stuff
+							if (direction != 4) {
+								response = fetchImage(currentAnswer[caIndex], direction + 1, response);
+								direction++;
+							} else {
+								response = fetchImage(currentAnswer[caIndex], direction - 3, response);
+								direction-=3;
+							}
 						} else if (input.equals("next")) {
-							//stuff
+							nextIndex();
+							direction = 1;
+							response = fetchImage(currentAnswer[caIndex], direction, response);
+							System.out.println("Fetched new set of images. Answer: " + currentAnswer[caIndex]);
 						} else if (input.equals("leaderboards")) {
-							//stuff
+							response.put("type", "leaderboards");
+							//send leaderboard stuff
 						} else if (input.equals("start")) {
-							//stuff
+							response.put("type", "new game");
 						} else {
-							//stuff
+							//probably a guess.
+							if (input.equals(currentAnswer[caIndex])) {
+								response.put("type", "+1");
+							} else {
+								response.put("type", "wrong guess");
+							}
+
 						}
 
 
@@ -134,13 +177,18 @@ public class SockServer {
 						response = wrongType(request);
 					}
 
-					writeOut(response);
+
+					byte[] msg2send = convert2Bytes(response);
+					dos.writeInt(msg2send.length);
+					dos.write(msg2send);
+					dos.flush();
+					//writeOut(response);
 
 				}
 
 				try {
-					os.close();
-					in.close();
+					dos.close();
+					ds.close();
 					sock.close();
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -194,6 +242,32 @@ public class SockServer {
 
  */
 
+	private static byte[] convert2Bytes(JSONObject jo) {
+		Gson gson = new Gson();
+		byte[] byteArray = gson.toJson(jo.toString()).getBytes();
+
+		return byteArray;
+	}
+
+	private static String convertFromBytes(byte[] bytes) {
+		Gson gson = new Gson();
+		String conv = new String(bytes, StandardCharsets.UTF_8);
+		String convert = gson.fromJson(conv, String.class);
+
+		return convert;
+	}
+
+	private static JSONObject fetchImage(String answer, int num, JSONObject jo) throws Exception {
+		jo.put("type", "image");
+
+		String n = String.valueOf(num);
+		answer = answer+n;
+		String path = "img/" + answer + ".png";
+		System.out.println("Image fetched. Path: " + path);
+		return sendImg(path, jo);
+
+	}
+
 	//TODO this is for you to implement, I just put a place holder here */
 	public static JSONObject sendImg(String filename, JSONObject obj) throws Exception {
 		obj.put("type", "image");
@@ -221,6 +295,15 @@ public class SockServer {
 			return obj;
 		}
 		return error("can't send image");
+	}
+
+	private static void nextIndex(){
+		caIndex++;
+
+		if (caIndex == currentAnswer.length) {
+			caIndex = 0;
+		}
+
 	}
 
 	public static JSONObject error(String err) {

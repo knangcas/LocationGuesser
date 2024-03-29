@@ -2,6 +2,7 @@ package Assign32starter;
 
 import java.awt.Dimension;
 
+import com.google.gson.Gson;
 import org.json.*;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -9,6 +10,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 import javax.imageio.ImageIO;
@@ -42,7 +44,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 
 	Socket sock;
 	OutputStream out;
-	ObjectOutputStream os;
+	DataOutputStream os;
 	BufferedReader bufferedReader;
 
 	DataInputStream in;
@@ -94,18 +96,35 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		request.put("type", "start");
 		//request.put("type", "start");
 
-		os.writeObject(request.toString());
+		byte[] sendThis = convert2Bytes(request);
+		os.writeInt(sendThis.length);
+		os.write(sendThis);
 		os.flush();
+		//os.writeObject(request.toString());
+		//os.flush();
 
+		//String s = "";
+		/*try {
+			int inLen = in.readInt();
+			byte[] message = new byte[inLen];
+			in.readFully(message,0,message.length);
 
-		try {
-			os.writeObject(request.toString());
+			//os.writeObject(request.toString());
 			os.flush();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 
-		String i = (String) in.readUTF();
+		 */
+
+
+		int inLen = in.readInt();
+		byte[] message = new byte[inLen];
+		in.readFully(message,0,message.length);
+		String i;
+
+		i = convertFromBytes(message);
+
 
 		//byte[] responseBytes = NetworkUtils.Receive(in);
 		JSONObject res = new JSONObject(i);
@@ -132,6 +151,21 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		close(); //closing the connection to server
 
 		// Now Client interaction only happens when the submit button is used, see "submitClicked()" method
+	}
+
+	private static byte[] convert2Bytes(JSONObject jo) {
+		Gson gson = new Gson();
+		byte[] byteArray = gson.toJson(jo.toString()).getBytes();
+
+		return byteArray;
+	}
+
+	private static String convertFromBytes(byte[] bytes) {
+		Gson gson = new Gson();
+		String conv = new String(bytes, StandardCharsets.UTF_8);
+		String convert = gson.fromJson(conv, String.class);
+
+		return convert;
 	}
 
 	/**
@@ -222,16 +256,36 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 				send.put("type", "input");
 			}
 			send.put("input", input);
-
-		try {
-			  os.writeObject(send.toString()); // this will crash the server, since it is not a JSON and thus the server will not handle it.
+			byte[] sendThis = convert2Bytes(send);
+			try {
+				os.writeInt(sendThis.length);
+				os.write(sendThis);
+				os.flush();
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 
-		// wait for an answer and handle accordingly
+		String r;
+			JSONObject res;
 		try {
+			System.out.println("Waiting on response");
+			  int inLen = in.readInt();
+			  byte[] msg = new byte[inLen];
+			  in.readFully(msg, 0, msg.length);
+			  r = convertFromBytes(msg);
+			  System.out.println("got a response");
+			  res = new JSONObject(r);
+			  evaluateResponse(res);
+
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (PicturePanel.InvalidCoordinateException e) {
+            throw new RuntimeException(e);
+        }
+
+            // wait for an answer and handle accordingly
+		/*try {
 			System.out.println("Waiting on response");
 			String i = (String) in.readUTF();
 			JSONObject response = new JSONObject(i);
@@ -241,6 +295,8 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+
+		 */
 		close();
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
@@ -248,18 +304,29 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		}
 	}
 
-	private void evaluateResponse(JSONObject json) {
+	private void evaluateResponse(JSONObject json) throws PicturePanel.InvalidCoordinateException, IOException {
 		String type = json.getString("type");
 		if (type.equals("message")) {
 			//append msg
 		} else if (type.equals("image")) {
-			//display image
+			ImageIcon img= readImg(json);
+			picPanel.insertImageI(0,0,img);
 		} else if (type.equals("leaderboards")) {
-			//display leaderboard
+			leaderboard(json);
+		} else if (type.equals("new game")) {
+			newGame(1);
 		}
 
+	}
 
+	private void leaderboard(JSONObject jo) {
+		//keys shuold be
+		//playername, rank, score
 
+		JDialog lb = new JDialog();
+		lb.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+		JLabel results = new JLabel("Super\nCool\nGuy");
+		lb.setVisible(true);
 
 	}
 
@@ -284,7 +351,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 
 		this.in = new DataInputStream(sock.getInputStream());
 
-		this.os = new ObjectOutputStream(out);
+		this.os = new DataOutputStream(out);
 		//this.bufferedReader = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
 	}
