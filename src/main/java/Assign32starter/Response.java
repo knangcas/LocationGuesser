@@ -37,6 +37,7 @@ static void addScore(int n) {
                 //TODO timer
                 ImageIcon img = readImg(json);
                 picPanel.insertImageI(0,0,img);
+                OutputPanel.timerStart();
             } else if (type.equals("+1")) {
                 addScore(1);
                 ImageIcon img = readImg(json);
@@ -46,6 +47,14 @@ static void addScore(int n) {
                 outputPanel.setPoints(score);
             } else if (type.equals("wrong guess")) {
                 outputPanel.appendOutput("Incorrect!");
+            } else if (type.equals("start") && !json.has("data")) {
+                outputPanel.appendOutput(json.getString("message"));
+            } else if (type.equals("start")) {
+                outputPanel.appendOutput(json.getString("message"));
+                ImageIcon img= readImg(json);
+                picPanel.insertImageI(0,0,img);
+                System.out.println("recieved image");
+
             }
 
 

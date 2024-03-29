@@ -1,11 +1,10 @@
 package Assign32starter;
 
-import java.awt.Dimension;
+import java.awt.*;
 
 import com.google.gson.Gson;
 import org.json.*;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.Socket;
@@ -42,6 +41,8 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 	OutputPanel outputPanel;
 	String currentMess;
 
+	TimerPanel timerPanel;
+
 	Socket sock;
 	OutputStream out;
 	DataOutputStream os;
@@ -57,6 +58,8 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 
 	int score = 0;
 
+
+
 	/**
 	 * Construct dialog
 	 * @throws IOException 
@@ -66,8 +69,9 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		this.port = port; 
 	
 		frame = new JFrame("Guess the location!");
+		frame.getContentPane().setBackground(Color.BLACK);
 		frame.setLayout(new GridBagLayout());
-		frame.setMinimumSize(new Dimension(700, 900));
+		frame.setMinimumSize(new Dimension(700, 700));
 		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 
@@ -89,6 +93,9 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		outputPanel = new OutputPanel();
 		outputPanel.addEventHandlers(this);
 		frame.add(outputPanel, c);
+
+
+
 
 		picPanel.newGame(1);
 		//insertImage("img/ASU1.png", 0, 0);
@@ -239,6 +246,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		// send request to server
 			if (start == 0) {
 			send.put("type", "start");
+			send.put("message", input);
 			start++;
 			} else {
 				send.put("type", "input");

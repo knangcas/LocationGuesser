@@ -16,6 +16,9 @@ import com.google.gson.Gson;
 import org.apache.commons.math3.random.RandomDataGenerator;
 import org.json.*;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 
 /**
  * A class to demonstrate a simple client-server connection using sockets.
@@ -35,6 +38,12 @@ public class SockServer {
 
 	static int caIndex;
 
+	static int score;
+
+	static String name;
+
+	private static Map<String, String> leaderBoards = new Hashtable<>();
+
 	public static void main (String args[]) {
 		currentAnswer = new String[]{"ASU", "Berlin", "Paris"};
 		direction = 1;
@@ -49,7 +58,7 @@ public class SockServer {
 			System.out.println("Server ready for connetion");
 
 			// placeholder for the person who wants to play a game
-			String name = "";
+			name = "";
 			int points = 0;
 
 			// read in one object, the message. we know a string was written only by knowing what the client sent. 
@@ -80,7 +89,7 @@ public class SockServer {
 
 				while (connected) {
 					String s = "";
-
+					getLeaders();
 					try {
 						int inLen = ds.readInt();
 						if(inLen >0) {
@@ -174,14 +183,27 @@ public class SockServer {
 							response.put("message", "Hello, what is your name?");
 							response.put("data", "");
 							sendImg("img/hi.png", response);
+							response.put("type", "start");
 						} else {
 							name = request.getString("message");
 							System.out.println(name);
-							response.put("type", "message");
+							response.put("type", "start");
 							response.put("message", "Hello " + name +" What would you like to do?");
+							if (!leaderBoards.containsKey(name)) {
+								leaderBoards.put(name, String.valueOf(0));
+							}
 						}
-					} else if (request.getString("type").equals("Name")) {
-						//todo
+					} else if (request.getString("type").equals("gOver")) {
+						if (!request.has("message")) {
+							response.put("type", "ok");
+						} else {
+							name = request.getString("name");
+							score = request.getInt("score");
+							if (score > Integer.parseInt(leaderBoards.get(name))) {
+								leaderBoards.put(name, String.valueOf(score));
+								writeJSON();
+							}
+						}
 					} else {
 						response = wrongType(request);
 					}
@@ -376,4 +398,81 @@ public class SockServer {
 		res.put("message", "Type " + req.getString("type") + " is not supported.");
 		return res;
 	}
+
+	static void getLeaders() {
+		ObjectMapper mapper = new ObjectMapper();
+
+		File fileObj = new File("resources/inventory.JSON");
+		if (fileObj == null) {
+			System.exit(1);
+		}
+		List<Player> players;
+		try {
+			players = mapper.readValue(fileObj, new TypeReference<List<Player>>() {
+			});
+			for (Player i : players) {
+				leaderBoards.put(i.getName(), String.valueOf(i.getScore()));
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	static JSONArray returnArray() {
+		JSONArray playerList = new JSONArray();
+		int i = 0;
+		for (String player : leaderBoards.keySet()){
+			JSONObject object = new JSONObject();
+			object.put("product", player);
+			object.put("quantity", Integer.parseInt(leaderBoards.get(player)));
+			playerList.put(i, object);
+			i++;
+		}
+		return playerList;
+	}
+
+	static void writeJSON() {
+
+		try {
+			FileWriter file = new FileWriter("resources/leaders.JSON");
+			file.write(returnArray().toString());
+			file.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	static JSONArray getTop5lb() {
+		int highest = 0;
+		int counter = 5;
+		Map<String, String> sorted = sortByValue(leaderBoards);
+		JSONArray top5 = new JSONArray();
+		for (String player : sorted.keySet()) {
+			JSONObject p = new JSONObject();
+			p.put("name", player);
+			p.put("score", Integer.parseInt(sorted.get(player)));
+			counter--;
+			if (counter == 0) {
+				break;
+			}
+		}
+
+		return top5;
+
+	}
+
+
+	public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
+		List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
+		list.sort(Map.Entry.comparingByValue());
+
+		Map<K, V> result = new LinkedHashMap<>();
+		for (Map.Entry<K, V> entry : list) {
+			result.put(entry.getKey(), entry.getValue());
+		}
+
+		return result;
+	}
+
 }

@@ -8,12 +8,7 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
-import javax.swing.JButton;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JLabel;
+import javax.swing.*;
 
 /**
  * The output panel that includes an input box, a submit button, and an output
@@ -49,6 +44,16 @@ public class OutputPanel extends JPanel {
   private JTextArea area;
   private ArrayList<EventHandlers> handlers = new ArrayList<>();
 
+  static Timer timer;
+
+  static int seconds;
+
+  JLabel cd;
+
+  static int score;
+
+  static boolean gOver;
+
   /**
    * Constructor
    */
@@ -66,6 +71,17 @@ public class OutputPanel extends JPanel {
     c.gridy = 0;
     c.weightx = 0.3;
     add(this.pointsLabel, c);
+    c = new GridBagConstraints();
+    c.fill = GridBagConstraints.BOTH;
+    c.gridx = 1;
+    c.gridy = 0;
+    //c.gridwidth = 2;
+    //c.weightx = 0.3;
+    seconds = 30;
+    cd = new JLabel("30");
+    cd.setHorizontalAlignment(JLabel.RIGHT);
+    cdTimer();
+    add(cd, c);
     
 
     // c = new GridBagConstraints();
@@ -130,7 +146,53 @@ public class OutputPanel extends JPanel {
     area = new JTextArea();
     JScrollPane pane = new JScrollPane(area);
     add(pane, c);
+
+
   }
+
+
+
+  public void cdTimer() {
+    timer = new Timer(1000, new ActionListener() {
+
+      @Override
+      public void actionPerformed(ActionEvent e) {
+        seconds--;
+
+        cd.setText(""+seconds);
+
+        if (seconds == 0) {
+          timer.stop();
+          timerEnd();
+        }
+
+      }
+    });
+  }
+
+  private void timerEnd() {
+    JOptionPane.showMessageDialog(null, "Game Over", "Game Over. Your final score is: " + score, JOptionPane.INFORMATION_MESSAGE);
+    gOver = true;
+    input.setText("gOver");
+    for (EventHandlers handler : handlers) {
+      handler.submitClicked();
+    }
+    clearInputText();
+  }
+
+  public boolean getGameStatus() {
+    return gOver;
+  }
+
+
+  public static void timerStart() {
+    timer.start();
+  }
+
+  public static void timerStop() {
+    timer.stop();
+  }
+
 
   /**
    * Get input text box text
@@ -159,6 +221,7 @@ public class OutputPanel extends JPanel {
    */
   public void setPoints(int points) {
     pointsLabel.setText("Current Points this round: " + points);
+    score = points;
   }
 
   /**
@@ -171,7 +234,7 @@ public class OutputPanel extends JPanel {
 
   /**
    * Register event observers
-   * @param handler
+   * @param //handler
    */
   public void addEventHandlers(EventHandlers handlerObj) {
     handlers.add(handlerObj);
