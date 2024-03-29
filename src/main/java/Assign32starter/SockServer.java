@@ -40,7 +40,7 @@ public class SockServer {
 		direction = 1;
 		rdg = new RandomDataGenerator();
 
-		caIndex = rdg.nextInt(0, currentAnswer.length);
+		caIndex = rdg.nextInt(0, currentAnswer.length-1);
 
 		try {
 
@@ -96,7 +96,6 @@ public class SockServer {
 						continue;
 					}
 
-
 					JSONObject response = isValid(s);
 
 					if (response.has("ok")) {      //if isValid gives "ok" key (indicating invalid JSON), skip the rest of the code, and iterate loop again (continue).
@@ -106,7 +105,6 @@ public class SockServer {
 					System.out.println("Got a request");
 					System.out.println(s);
 					JSONObject request = new JSONObject(s);
-
 
 					response = testField(request, "type", null);
 					if (!response.getBoolean("ok")) {    // no "type" header provided
@@ -157,12 +155,15 @@ public class SockServer {
 							response.put("type", "new game");
 						} else {
 							//probably a guess.
-							if (input.equals(currentAnswer[caIndex])) {
+							if (input.equals(currentAnswer[caIndex].toLowerCase())) {
+								nextIndex();
+								direction = 1;
+								response = fetchImage(currentAnswer[caIndex], direction, response);
 								response.put("type", "+1");
+								System.out.println("Fetched new set of images. Answer: " + currentAnswer[caIndex]);
 							} else {
 								response.put("type", "wrong guess");
 							}
-
 						}
 
 

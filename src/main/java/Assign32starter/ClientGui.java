@@ -55,6 +55,8 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 
 	int start = 0;
 
+	int score = 0;
+
 	/**
 	 * Construct dialog
 	 * @throws IOException 
@@ -65,8 +67,9 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 	
 		frame = new JFrame("Guess the location!");
 		frame.setLayout(new GridBagLayout());
-		frame.setMinimumSize(new Dimension(500, 500));
+		frame.setMinimumSize(new Dimension(700, 900));
 		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
 
 		// setup the top picture frame
 		picPanel = new PicturePanel();
@@ -130,7 +133,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		JSONObject res = new JSONObject(i);
 		System.out.println("Connection Successful");
 
-		ImageIcon ii = readImg(res);
+		ImageIcon ii = Response.readImg(res);
 		outputPanel.appendOutput(res.getString("message"));
 		try {
 			picPanel.insertImageI(0, 0, ii);
@@ -175,32 +178,17 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 	public void show(boolean makeModal) {
 		frame.pack();
 		//frame.setModal(makeModal);
+		frame.setLocationRelativeTo(null);
 		frame.setVisible(true);
 	}
 
-	private ImageIcon readImg(JSONObject jo) {
-		System.out.println("Your image");
-		Base64.Decoder decoder = Base64.getDecoder();
-		byte[] bytes = decoder.decode(jo.getString("data"));
-		ImageIcon icon = null;
-		try (ByteArrayInputStream bais = new ByteArrayInputStream(bytes)) {
-			BufferedImage image = ImageIO.read(bais);
-			icon = new ImageIcon(image);
-		} catch (IOException e) {
-            e.printStackTrace();
-        }
-		return icon;
 
-	}
 	/**
 	 * Creates a new game and set the size of the grid 
 	 * @param dimension - the size of the grid will be dimension x dimension
 	 * No changes should be needed here
 	 */
-	public void newGame(int dimension) {
-		picPanel.newGame(1);
-		outputPanel.appendOutput("Started new game. Resetting score and timer");
-	}
+
 
 	/**
 	 * Insert an image into the grid at position (col, row)
@@ -264,9 +252,10 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-
+			outputPanel.clearInputText();
 		String r;
 			JSONObject res;
+			JSONObject servReply;
 		try {
 			System.out.println("Waiting on response");
 			  int inLen = in.readInt();
@@ -274,9 +263,14 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			  in.readFully(msg, 0, msg.length);
 			  r = convertFromBytes(msg);
 			  System.out.println("got a response");
-			  outputPanel.clearText();
+			  outputPanel.clearInputText();
 			  res = new JSONObject(r);
-			  evaluateResponse(res);
+			  servReply = Response.evaluateResponse(res, picPanel, outputPanel);
+			  score = Response.getScore();
+
+			  if (servReply !=null) {
+				  reply2Server(servReply); //incase we need to send stuff back
+			  }
 
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
@@ -305,34 +299,39 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		}
 	}
 
-	private void evaluateResponse(JSONObject json) throws PicturePanel.InvalidCoordinateException, IOException {
-		String type = json.getString("type");
-		if (type.equals("message")) {
-			//append msg
-		} else if (type.equals("image")) {
-			ImageIcon img= readImg(json);
-			picPanel.insertImageI(0,0,img);
-			System.out.println("recieved image");
-		} else if (type.equals("leaderboards")) {
-			leaderboard(json);
-		} else if (type.equals("new game")) {
-			newGame(1);
-			ImageIcon img = readImg(json);
-			picPanel.insertImageI(0,0,img);
+	//just in case
+	public void reply2Server(JSONObject jo) {
+		byte[] sendThis = convert2Bytes(jo);
+		try {
+			os.writeInt(sendThis.length);
+			os.write(sendThis);
+			os.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+
+		String r;
+		JSONObject res;
+		try {
+			System.out.println("Waiting on response");
+			int inLen = in.readInt();
+			byte[] msg = new byte[inLen];
+			in.readFully(msg, 0, msg.length);
+			r = convertFromBytes(msg);
+			System.out.println("got a response");
+			outputPanel.clearText();
+			res = new JSONObject(r);
+			Response.evaluateResponse(res, picPanel, outputPanel);
+			score = Response.getScore();
+
+		} catch (IOException | PicturePanel.InvalidCoordinateException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
 
 	}
 
-	private void leaderboard(JSONObject jo) {
-		//keys shuold be
-		//playername, rank, score
-
-		JDialog lb = new JDialog();
-		lb.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-		JLabel results = new JLabel("Super\nCool\nGuy");
-		lb.setVisible(true);
-
-	}
 
 	/**
 	 * Key listener for the input text box

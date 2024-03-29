@@ -140,7 +140,16 @@ public class OutputPanel extends JPanel {
     return input.getText();
   }
 
+  public String getWindowText() {
+    return area.getText();
+  }
+
   public void clearText() {
+    //input.setText("");
+    area.setText("");
+  }
+
+  public void clearInputText() {
     input.setText("");
   }
 
@@ -173,6 +182,11 @@ public class OutputPanel extends JPanel {
    * @param message - the message to print
    */
   public void appendOutput(String message) {
+    String current = this.getWindowText();
+    clearText();
     area.append(message + "\n");
+    area.append(current);
+    area.setCaretPosition(0);
+
   }
 }
