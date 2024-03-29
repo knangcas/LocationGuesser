@@ -162,29 +162,50 @@ public class SockServer {
 							direction = 1;
 							response = fetchImage(currentAnswer[caIndex], direction, response);
 							System.out.println("Fetched new set of images. Answer: " + currentAnswer[caIndex]);
-						} else {
-							if (input.equals(currentAnswer[caIndex].toLowerCase())) {
+						} else if (input.equals("gover!revog")) {
+								if (!request.has("score")) {
+										System.out.println("Acknowledging Game Over");
+										response.put("type", "ok");
+									} else {
+										//name = request.getString("name");
+									System.out.println("Storing score");
+										score = request.getInt("score");
+										if (leaderBoards.get(name) != null) {
+											if (score > Integer.parseInt(leaderBoards.get(name))) {
+												leaderBoards.put(name, String.valueOf(score));
+												writeJSON();
+												System.out.println("Updated leaders.json with new high score");
+											}
+										}
+										else {
+											leaderBoards.put(name, String.valueOf(score));
+											writeJSON();
+											System.out.println("Updating leaders.json");
+										}
+										previouslyPlayed = true;
+										response.put("type", "start2");
+										response.put("message", "Thanks for playing. Select an option");
+									}
+						} else if (input.equals(currentAnswer[caIndex].toLowerCase())) {
 								nextIndex();
 								direction = 1;
 								response = fetchImage(currentAnswer[caIndex], direction, response);
 								response.put("type", "+1");
 								System.out.println("Fetched new set of images. Answer: " + currentAnswer[caIndex]);
-							} else {
-								response.put("type", "wrong guess");
-							}
+						} else {
+							response.put("type", "wrong guess");
 						}
-
 
 					} else if (request.getString("type").equals("input") && !gameStarted) {
 							String input = request.getString("input");
 
-							if (input.equals("leaderboards")) {
+							if (input.equals("leaderboard")) {
 								response.put("type", "leaderboards");
 								JSONArray lbtop5 = getTop5lb();
 								response.put("data", lbtop5);
 								System.out.println("sending back top5 leaders");
 								System.out.println(lbtop5);
-							} else if (input.equals("start")) {
+							} else if (input.equals("start") && !previouslyPlayed) {
 								gameStarted = true;
 								response = fetchImage(currentAnswer[caIndex], 1, response);
 								response.put("type", "new game");
@@ -192,6 +213,14 @@ public class SockServer {
 								gameStarted = true;
 								response = fetchImage(currentAnswer[caIndex], 1, response);
 								response.put("type", "new game");
+							} else if (input.equals("quit")) {
+								response.put("type", "quit");
+								Thread.sleep(20000);
+								System.exit(0);
+							} else if (previouslyPlayed){
+								response.put("type", "notplayingCommands");
+							} else {
+								response.put("type", "notplayingCommandsIntro");
 							}
 
 
@@ -212,24 +241,15 @@ public class SockServer {
 								//leaderBoards.put(name, String.valueOf(0));
 							//}
 						}
-					} else if (request.getString("type").equals("gOver")) {
-						if (!request.has("message")) {
-							response.put("type", "ok");
-						} else {
-							name = request.getString("name");
-							score = request.getInt("score");
-							if (score > Integer.parseInt(leaderBoards.get(name))) {
-								leaderBoards.put(name, String.valueOf(score));
-								writeJSON();
-							}
-							gameStarted = false;
-							previouslyPlayed = true;
-						}
-					} else {
+					}  else {
 						response = wrongType(request);
 					}
 
+					if (previouslyPlayed) {
+						gameStarted = false;
+					}
 
+					System.out.println("sending response");
 					byte[] msg2send = convert2Bytes(response);
 					dos.writeInt(msg2send.length);
 					dos.write(msg2send);
@@ -445,8 +465,8 @@ public class SockServer {
 		int i = 0;
 		for (String player : leaderBoards.keySet()){
 			JSONObject object = new JSONObject();
-			object.put("product", player);
-			object.put("quantity", Integer.parseInt(leaderBoards.get(player)));
+			object.put("name", player);
+			object.put("score", Integer.parseInt(leaderBoards.get(player)));
 			playerList.put(i, object);
 			i++;
 		}

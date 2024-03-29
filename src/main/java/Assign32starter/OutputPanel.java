@@ -1,7 +1,6 @@
 package Assign32starter;
 
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
@@ -153,13 +152,21 @@ public class OutputPanel extends JPanel {
 
 
   public void cdTimer() {
+    Font font1 = new Font("Arial", Font.BOLD, 32);
+
+
     timer = new Timer(1000, new ActionListener() {
 
       @Override
       public void actionPerformed(ActionEvent e) {
         seconds--;
-
+        if (seconds < 4) {
+          cd.setFont(font1);
+          cd.setForeground(Color.RED);
+        }
         cd.setText(""+seconds);
+
+
 
         if (seconds == 0) {
           timer.stop();
@@ -170,10 +177,14 @@ public class OutputPanel extends JPanel {
     });
   }
 
+  public static void timerReset() {
+    seconds = 30;
+  }
+
   private void timerEnd() {
-    JOptionPane.showMessageDialog(null, "Game Over", "Game Over. Your final score is: " + score, JOptionPane.INFORMATION_MESSAGE);
+    JOptionPane.showMessageDialog(null,  "Game Over. Your final score is: " + score, "Game Over", JOptionPane.INFORMATION_MESSAGE);
     gOver = true;
-    input.setText("gOver");
+    input.setText("gover!revog");
     for (EventHandlers handler : handlers) {
       handler.submitClicked();
     }
