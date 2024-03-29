@@ -1,22 +1,103 @@
 package Assign32starter;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 
 public class Leaderboard {
 
+    static String[] lboard;
+    static int[] score;
     static void leaderboard(JSONObject jo) {
         //keys shuold be
         //playername, rank, score
 
-        JDialog lb = new JDialog();
-        lb.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
-        JLabel results = new JLabel("Super\nCool\nGuy");
+        int players = 0;
 
-        lb.add(results);
+        lboard = new String[5];
+        score = new int[5];
+        JSONArray array = jo.getJSONArray("data");
+
+
+        for(int i = 0; i < 5; i++) {
+            JSONObject player= (JSONObject) array.get(i);
+            lboard[i] = player.getString("name");
+            score[i] = player.getInt("score");
+        }
+
+
+
+        JDialog lb = new JDialog();
+        lb.setTitle("Top 5 scores");
+        lb.setLayout(new GridBagLayout());
+        lb.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         lb.setLocationRelativeTo(null);
+        lb.setSize(300, 200);
+        lb.setModal(true);
+
+
+
+
+        JLabel result1 = new JLabel("1. Score: " + score[0] + " by " + lboard[0]);
+        result1.setHorizontalAlignment(JLabel.LEFT);
+
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridy = 0;
+        gbc.gridx = 0;
+        lb.add(result1, gbc);
+
+        JLabel result2 = new JLabel("2. Score: " + score[1] + " by " + lboard[1]);
+        result2.setHorizontalAlignment(JLabel.LEFT);
+        gbc = new GridBagConstraints();
+        gbc.gridy = 1;
+        gbc.gridx = 0;
+        lb.add(result2, gbc);
+
+        JLabel result3 = new JLabel("3. Score: " + score[2] + " by " + lboard[2]);
+        result3.setHorizontalAlignment(JLabel.LEFT);
+        gbc = new GridBagConstraints();
+        gbc.gridy = 2;
+        gbc.gridx = 0;
+        lb.add(result3, gbc);
+
+        JLabel result4 = new JLabel("4. Score: " + score[3] + " by " + lboard[3]);
+        result4.setHorizontalAlignment(JLabel.LEFT);
+        gbc = new GridBagConstraints();
+        gbc.gridy = 3;
+        gbc.gridx = 0;
+        lb.add(result4, gbc);
+
+        JLabel result5 = new JLabel("5. Score: " + score[4] + " by " + lboard[4]);
+        result5.setHorizontalAlignment(JLabel.LEFT);
+        gbc = new GridBagConstraints();
+        gbc.gridy = 4;
+        gbc.gridx = 0;
+        lb.add(result5, gbc);
+
+        JButton button = new JButton("OK");
+
+        gbc = new GridBagConstraints();
+        gbc.gridy=5;
+        gbc.gridx=0;
+        lb.add(button, gbc);
+
+        button.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                lb.dispose();
+            }
+        });
+
+
         lb.setVisible(true);
+
+
+
+
 
     }
 

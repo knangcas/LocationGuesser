@@ -6,8 +6,12 @@ public class Player {
 
     private int score;
 
+    Player() {
+
+    }
+
     Player(String name, int score) {
-        this.score = n;
+        this.score = score;
         this.name = name;
     }
 

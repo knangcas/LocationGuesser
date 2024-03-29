@@ -11,6 +11,8 @@ import javax.swing.ImageIcon;
 
 import java.awt.image.BufferedImage;
 import java.io.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.google.gson.Gson;
 import org.apache.commons.math3.random.RandomDataGenerator;
@@ -42,12 +44,18 @@ public class SockServer {
 
 	static String name;
 
+	static boolean gameStarted;
+
+	static boolean previouslyPlayed;
+
 	private static Map<String, String> leaderBoards = new Hashtable<>();
 
 	public static void main (String args[]) {
 		currentAnswer = new String[]{"ASU", "Berlin", "Paris"};
 		direction = 1;
 		rdg = new RandomDataGenerator();
+		gameStarted = false;
+		previouslyPlayed = false;
 
 		caIndex = rdg.nextInt(0, currentAnswer.length-1);
 
@@ -122,7 +130,7 @@ public class SockServer {
 						continue;
 					}
 
-					if (request.getString("type").equals("input")) {
+					if (request.getString("type").equals("input") && gameStarted) {
 						//TODO
 						JSONObject test = testField(request, "input", "input");
 						if (!test.getBoolean("ok")) {
@@ -154,16 +162,7 @@ public class SockServer {
 							direction = 1;
 							response = fetchImage(currentAnswer[caIndex], direction, response);
 							System.out.println("Fetched new set of images. Answer: " + currentAnswer[caIndex]);
-						} else if (input.equals("leaderboards")) {
-							response.put("type", "leaderboards");
-							//send leaderboard stuff
-						} else if (input.equals("start")) {
-							//response.put("type", "new game");
-
-							response = fetchImage(currentAnswer[caIndex], 1, response);
-							response.put("type", "new game");
 						} else {
-							//probably a guess.
 							if (input.equals(currentAnswer[caIndex].toLowerCase())) {
 								nextIndex();
 								direction = 1;
@@ -174,6 +173,26 @@ public class SockServer {
 								response.put("type", "wrong guess");
 							}
 						}
+
+
+					} else if (request.getString("type").equals("input") && !gameStarted) {
+							String input = request.getString("input");
+
+							if (input.equals("leaderboards")) {
+								response.put("type", "leaderboards");
+								JSONArray lbtop5 = getTop5lb();
+								response.put("data", lbtop5);
+								System.out.println("sending back top5 leaders");
+								System.out.println(lbtop5);
+							} else if (input.equals("start")) {
+								gameStarted = true;
+								response = fetchImage(currentAnswer[caIndex], 1, response);
+								response.put("type", "new game");
+							} else if (input.equals("new game") && previouslyPlayed) {
+								gameStarted = true;
+								response = fetchImage(currentAnswer[caIndex], 1, response);
+								response.put("type", "new game");
+							}
 
 
 					} else if (request.getString("type").equals("start")) {
@@ -189,9 +208,9 @@ public class SockServer {
 							System.out.println(name);
 							response.put("type", "start");
 							response.put("message", "Hello " + name +" What would you like to do?");
-							if (!leaderBoards.containsKey(name)) {
-								leaderBoards.put(name, String.valueOf(0));
-							}
+							//if (!leaderBoards.containsKey(name)) {
+								//leaderBoards.put(name, String.valueOf(0));
+							//}
 						}
 					} else if (request.getString("type").equals("gOver")) {
 						if (!request.has("message")) {
@@ -203,6 +222,8 @@ public class SockServer {
 								leaderBoards.put(name, String.valueOf(score));
 								writeJSON();
 							}
+							gameStarted = false;
+							previouslyPlayed = true;
 						}
 					} else {
 						response = wrongType(request);
@@ -402,7 +423,7 @@ public class SockServer {
 	static void getLeaders() {
 		ObjectMapper mapper = new ObjectMapper();
 
-		File fileObj = new File("resources/inventory.JSON");
+		File fileObj = new File("resources/leaders.json");
 		if (fileObj == null) {
 			System.exit(1);
 		}
@@ -446,16 +467,40 @@ public class SockServer {
 	static JSONArray getTop5lb() {
 		int highest = 0;
 		int counter = 5;
-		Map<String, String> sorted = sortByValue(leaderBoards);
+
+		List<String> sorted = leaderBoards.entrySet().stream()
+				.sorted(Map.Entry.comparingByValue())
+				.map(Map.Entry::getKey)
+				.collect(Collectors.toList());
+		//Map<String, String> sorted = sortByValue(leaderBoards);
 		JSONArray top5 = new JSONArray();
-		for (String player : sorted.keySet()) {
+
+		int sortedLen = sorted.size();
+		int bound = 5;
+		if (sortedLen < bound) {
+			bound = sortedLen;
+		}
+		int rank = 1;
+		int counter2 = 0;
+		for (int i = bound - 1; i >= bound - 6; i--) {
 			JSONObject p = new JSONObject();
-			p.put("name", player);
-			p.put("score", Integer.parseInt(sorted.get(player)));
-			counter--;
-			if (counter == 0) {
-				break;
+			if (counter2 < sortedLen) {
+				String name = sorted.get(i);
+				int score = Integer.parseInt(leaderBoards.get(name));
+				p.put("name", name);
+				p.put("score", score);
+				p.put("rank", rank);
+				rank++;
+				top5.put(p);
+				counter2++;
+			} else {
+				p.put("name", "PLAYER");
+				p.put("score", 0);
+				p.put("rank", rank);
+				rank++;
+				top5.put(p);
 			}
+
 		}
 
 		return top5;
