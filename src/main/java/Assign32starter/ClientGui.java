@@ -63,7 +63,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		this.host = host; 
 		this.port = port; 
 	
-		frame = new JFrame();
+		frame = new JFrame("Guess the location!");
 		frame.setLayout(new GridBagLayout());
 		frame.setMinimumSize(new Dimension(500, 500));
 		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -88,7 +88,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		frame.add(outputPanel, c);
 
 		picPanel.newGame(1);
-		insertImage("img/ASU1.png", 0, 0);
+		//insertImage("img/ASU1.png", 0, 0);
 
 		open(); // opening server connection here
 		//currentMess = "{'type': 'start'}"; // very initial start message for the connection
@@ -199,7 +199,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 	 */
 	public void newGame(int dimension) {
 		picPanel.newGame(1);
-		outputPanel.appendOutput("Started new game with a " + dimension + "x" + dimension + " board.");
+		outputPanel.appendOutput("Started new game. Resetting score and timer");
 	}
 
 	/**
@@ -274,6 +274,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			  in.readFully(msg, 0, msg.length);
 			  r = convertFromBytes(msg);
 			  System.out.println("got a response");
+			  outputPanel.clearText();
 			  res = new JSONObject(r);
 			  evaluateResponse(res);
 
@@ -311,10 +312,13 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		} else if (type.equals("image")) {
 			ImageIcon img= readImg(json);
 			picPanel.insertImageI(0,0,img);
+			System.out.println("recieved image");
 		} else if (type.equals("leaderboards")) {
 			leaderboard(json);
 		} else if (type.equals("new game")) {
 			newGame(1);
+			ImageIcon img = readImg(json);
+			picPanel.insertImageI(0,0,img);
 		}
 
 	}

@@ -13,6 +13,7 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 
 import com.google.gson.Gson;
+import org.apache.commons.math3.random.RandomDataGenerator;
 import org.json.*;
 
 
@@ -30,12 +31,16 @@ public class SockServer {
 
 	static String[] currentAnswer;
 
+	static RandomDataGenerator rdg;
+
 	static int caIndex;
 
 	public static void main (String args[]) {
 		currentAnswer = new String[]{"ASU", "Berlin", "Paris"};
 		direction = 1;
-		caIndex = 1;
+		rdg = new RandomDataGenerator();
+
+		caIndex = rdg.nextInt(0, currentAnswer.length);
 
 		try {
 
@@ -146,6 +151,9 @@ public class SockServer {
 							response.put("type", "leaderboards");
 							//send leaderboard stuff
 						} else if (input.equals("start")) {
+							//response.put("type", "new game");
+
+							response = fetchImage(currentAnswer[caIndex], 1, response);
 							response.put("type", "new game");
 						} else {
 							//probably a guess.

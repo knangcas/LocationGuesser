@@ -140,6 +140,10 @@ public class OutputPanel extends JPanel {
     return input.getText();
   }
 
+  public void clearText() {
+    input.setText("");
+  }
+
   /**
    * Set points in label box
    * @param points current points in round
