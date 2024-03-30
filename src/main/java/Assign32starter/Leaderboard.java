@@ -100,7 +100,7 @@ public class Leaderboard {
         gbc.gridx = 0;
         lb.add(result5, gbc);
 
-        JButton button = new JButton("Cool!");
+        JButton button = new JButton("OK");
 
         gbc = new GridBagConstraints();
         gbc.gridy=6;
