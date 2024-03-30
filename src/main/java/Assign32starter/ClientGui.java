@@ -62,6 +62,8 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 
 	int score = 0;
 
+	String name;
+
 
 
 	/**
@@ -168,6 +170,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		close(); //closing the connection to server
 
 		JDialog welcome = new JDialog();
+		welcome.setTitle("name that location v1.0");
 		welcome.setModal(true);
 		welcome.getContentPane().setBackground(Color.WHITE);
 		welcome.setSize(500,500);
@@ -191,16 +194,57 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		welcome.add(nameField, c);
 
 		JButton nameButton = new JButton("Submit");
+		nameButton.setPreferredSize(new Dimension(120, 25));
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 3;
 		welcome.add(nameButton, c);
 
+		JButton leaderButton = new JButton("Leaderboard");
+		leaderButton.setPreferredSize(new Dimension(120, 25));
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 4;
+		welcome.add(leaderButton, c);
+
+		JButton quitButton = new JButton("Quit");
+		quitButton.setPreferredSize(new Dimension(120, 25));
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 5;
+		welcome.add(quitButton, c);
+
+
+
 		nameButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				outputPanel.setInputText(nameField.getText());
+				name = nameField.getText();
+				outputPanel.setInputText(name);
+				System.out.println("Player's name is " + name);
+				submitClicked();
+				welcome.dispose();
+			}
+		});
 
+		leaderButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Showing leaderboard");
+				outputPanel.setInputText("leaderboard");
+				start = 1;
+				submitClicked();
+				start = 0;
+			}
+		});
+
+
+		quitButton.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				System.out.println("Quitting...");
+				outputPanel.setInputText("quit");
+				start = 1;
 				submitClicked();
 				welcome.dispose();
 			}
@@ -295,7 +339,8 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 	public void submitClicked() {
 		try {
 			open(); // opening a server connection again
-			System.out.println("submit clicked ");
+			System.out.println("Submit clicked. Sending message");
+
 
 			// Pulls the input box text
 			String input = outputPanel.getInputText();
@@ -313,6 +358,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 				send.put("type", "input");
 			}
 			send.put("input", input);
+			System.out.println(send);
 			byte[] sendThis = convert2Bytes(send);
 			try {
 				os.writeInt(sendThis.length);
@@ -338,6 +384,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 				if (!res.has("data")) {
 					System.out.println(res);
 				}
+
 				servReply = Response.evaluateResponse(res, picPanel, outputPanel);
 				score = Response.getScore();
 
@@ -388,6 +435,11 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			e.printStackTrace();
 		}
 		outputPanel.clearInputText();
+
+		if (jo.has("input") && jo.getString("input").equals("quit2")) {
+			close();
+			System.exit(0);
+		}
 		String r;
 		JSONObject res;
 		try {

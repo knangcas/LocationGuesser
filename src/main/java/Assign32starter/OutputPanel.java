@@ -37,7 +37,7 @@ public class OutputPanel extends JPanel {
     // executes when the submit button is clicked
     void submitClicked();
   }
-  private JLabel pointsLabel = new JLabel("Current Points this round: 0");
+  private static JLabel pointsLabel = new JLabel("Current Points this round: 0");
   private JTextField input;
   private JButton submit;
   private JTextArea area;
@@ -47,7 +47,7 @@ public class OutputPanel extends JPanel {
 
   static int seconds;
 
-  JLabel cd;
+  static JLabel cd;
 
   static int score;
 
@@ -63,13 +63,14 @@ public class OutputPanel extends JPanel {
     GridBagConstraints c = new GridBagConstraints();
 
 
-
+    this.setBackground(Color.black);
     c = new GridBagConstraints();
     c.fill = GridBagConstraints.HORIZONTAL;
     c.gridx = 0;
     c.gridy = 0;
     c.weightx = 0.3;
     add(this.pointsLabel, c);
+    pointsLabel.setForeground(Color.white);
     c = new GridBagConstraints();
     c.fill = GridBagConstraints.BOTH;
     c.gridx = 1;
@@ -78,6 +79,7 @@ public class OutputPanel extends JPanel {
     //c.weightx = 0.3;
     seconds = 30;
     cd = new JLabel("30");
+    cd.setForeground(Color.WHITE);
     cd.setHorizontalAlignment(JLabel.RIGHT);
     cdTimer();
     add(cd, c);
@@ -152,7 +154,13 @@ public class OutputPanel extends JPanel {
 
 
   public void cdTimer() {
-    Font font1 = new Font("Arial", Font.BOLD, 32);
+    Font font1 = new Font("Arial", Font.BOLD, 24);
+    Font font2 = new Font("Arial", Font.BOLD, 28);
+    Font font3 = new Font("Arial", Font.BOLD, 30);
+    Font font4 = new Font("Arial", Font.BOLD, 32);
+    Font font5 = new Font("Arial", Font.BOLD, 34);
+    cd.setFont(font1);
+    cd.setForeground(Color.white);
 
 
     timer = new Timer(1000, new ActionListener() {
@@ -160,18 +168,30 @@ public class OutputPanel extends JPanel {
       @Override
       public void actionPerformed(ActionEvent e) {
         seconds--;
-        if (seconds < 4) {
-          cd.setFont(font1);
+
+        if (seconds == 3) {
+          cd.setFont(font2);
+          cd.setForeground(Color.YELLOW);
+        }
+        if (seconds == 2) {
+          cd.setFont(font3);
+          cd.setForeground(Color.ORANGE);
+        }
+
+        if (seconds == 1) {
+          cd.setFont(font4);
           cd.setForeground(Color.RED);
         }
+
         cd.setText(""+seconds);
-
-
-
         if (seconds == 0) {
+          cd.setFont(font5);
+          cd.setForeground(Color.RED);
+          cd.setText(""+seconds);
           timer.stop();
           timerEnd();
         }
+
 
       }
     });
@@ -179,6 +199,10 @@ public class OutputPanel extends JPanel {
 
   public static void timerReset() {
     seconds = 30;
+    cd.setFont(new Font("Arial", Font.BOLD, 24));
+    cd.setForeground(Color.white);
+    score = 0;
+    pointsLabel.setText("Current Points this round: 0");
   }
 
   private void timerEnd() {

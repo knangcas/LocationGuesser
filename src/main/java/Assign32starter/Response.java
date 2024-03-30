@@ -13,6 +13,8 @@ public class Response {
 
     public static int score = 0;
 
+    static boolean bonus=false;
+
     static int getScore() {
         return score;
     }
@@ -39,12 +41,51 @@ public class Response {
             picPanel.insertImageI(0,0,img);
             OutputPanel.timerReset();
             OutputPanel.timerStart();
+            score = 0;
+            bonus = false;
+            outputPanel.setPoints(score);
         } else if (type.equals("+1")) {
-            addScore(1);
+            if (bonus) {
+                addScore(2);
+            } else {
+                addScore(1);
+            }
+            int streak = 0;
+            int add = 0;
+            if (json.has("streak")) {
+                streak = json.getInt("streak");
+            }
+
+            if (streak == 5) {
+                addScore(2);
+                add = 2;
+            }
+            if (streak == 10) {
+                addScore(4);
+                add = 4;
+            }
+
+            if (streak == 20) {
+                addScore(6);
+                add = 6;
+                bonus = true;
+                streak = 1;
+            }
+
+
+
             ImageIcon img = readImg(json);
             picPanel.insertImageI(0,0,img);
             System.out.println("Success. Score + 1. New image loaded. ");
-            outputPanel.appendOutput("Correct!");
+            if (streak > 0) {
+                if (streak == 1) {
+                    outputPanel.appendOutput("WOW! 20 in a row! Correct guesses are now double points!");
+                } else {
+                    outputPanel.appendOutput("Amazing! " + streak + " in a row! (" + add + " bonus points!");
+                }
+            } else {
+                outputPanel.appendOutput("Correct!");
+            }
             outputPanel.setPoints(score);
         } else if (type.equals("wrong guess")) {
             outputPanel.appendOutput("Incorrect!");
@@ -67,8 +108,9 @@ public class Response {
             outputPanel.appendOutput("Invalid command");
         } else if (type.equals("quit")) {
             System.out.println("Quitting game.");
-            //Thread.sleep(3000);
-            System.exit(0);
+            response.put("type", "input");
+            response.put("input", "quit2");
+            return response;
 
         } else if (type.equals("ok")) {
             response.put("type", "input");

@@ -48,6 +48,8 @@ public class SockServer {
 
 	static boolean previouslyPlayed;
 
+	static int streak = 0;
+
 	private static Map<String, String> leaderBoards = new Hashtable<>();
 
 	public static void main (String args[]) {
@@ -166,34 +168,32 @@ public class SockServer {
 							if (!request.has("score")) {
 								System.out.println("Acknowledging Game Over");
 								response.put("type", "ok");
+								gameStarted = false;
+								streak = 0;
 							} else {
-								//name = request.getString("name");
-								System.out.println("Storing score");
-								score = request.getInt("score");
-								if (leaderBoards.get(name) != null) {
-									if (score > Integer.parseInt(leaderBoards.get(name))) {
-										leaderBoards.put(name, String.valueOf(score));
-										writeJSON();
-										System.out.println("Updated leaders.json with new high score");
-									}
-								}
-								else {
-									leaderBoards.put(name, String.valueOf(score));
-									writeJSON();
-									System.out.println("Updating leaders.json");
-								}
-								previouslyPlayed = true;
-								response.put("type", "start2");
-								response.put("message", "Thanks for playing. Select an option");
+
 							}
 						} else if (input.equals(currentAnswer[caIndex].toLowerCase())) {
 							nextIndex();
 							direction = 1;
 							response = fetchImage(currentAnswer[caIndex], direction, response);
 							response.put("type", "+1");
+							streak++;
+							int threshold = 5;
+							if (streak > 5) {
+								threshold = 10;
+							}
+							if (streak > 10) {
+								threshold = 20;
+							}
+							if (streak == threshold) {
+								response.put("streak", streak);
+							}
 							System.out.println("Fetched new set of images. Answer: " + currentAnswer[caIndex]);
 						} else {
+							streak = 0;
 							response.put("type", "wrong guess");
+							System.out.println(name + "answered incorrectly. Correct answer is " + currentAnswer[caIndex]);
 						}
 
 					} else if (request.getString("type").equals("input") && !gameStarted) {
@@ -209,14 +209,36 @@ public class SockServer {
 							gameStarted = true;
 							response = fetchImage(currentAnswer[caIndex], 1, response);
 							response.put("type", "new game");
-						} else if (input.equals("new game") && previouslyPlayed) {
+						} else if (input.equals("new game")) {
+							streak = 0;
 							gameStarted = true;
+							previouslyPlayed = true;
+							System.out.println("new game started");
 							response = fetchImage(currentAnswer[caIndex], 1, response);
 							response.put("type", "new game");
 						} else if (input.equals("quit")) {
 							response.put("type", "quit");
-							Thread.sleep(20000);
+						} else if (input.equals("quit2")) {
+							System.out.println("quitting game.");
 							System.exit(0);
+						} else if (input.equals("gover!revog")) {
+							//name = request.getString("name");
+							System.out.println("Storing score");
+							score = request.getInt("score");
+							if (leaderBoards.get(name) != null) {
+								if (score > Integer.parseInt(leaderBoards.get(name))) {
+									leaderBoards.put(name, String.valueOf(score));
+									writeJSON();
+									System.out.println("Updated leaders.json with new high score");
+								}
+							} else {
+								leaderBoards.put(name, String.valueOf(score));
+								writeJSON();
+								System.out.println("Updating leaders.json");
+							}
+							previouslyPlayed = true;
+							response.put("type", "start2");
+							response.put("message", "Thanks for playing. Select an option");
 						} else if (previouslyPlayed){
 							response.put("type", "notplayingCommands");
 						} else {
@@ -236,7 +258,7 @@ public class SockServer {
 							name = request.getString("message");
 							System.out.println(name);
 							response.put("type", "start");
-							response.put("message", "Hello " + name +" What would you like to do?");
+							response.put("message", "Hello " + name + " What would you like to do?");
 							//if (!leaderBoards.containsKey(name)) {
 							//leaderBoards.put(name, String.valueOf(0));
 							//}
@@ -245,11 +267,11 @@ public class SockServer {
 						response = wrongType(request);
 					}
 
-					if (previouslyPlayed) {
-						gameStarted = false;
-					}
+					//if (previouslyPlayed) {
+						//gameStarted = false;
+					//}
 
-					System.out.println("sending response");
+					System.out.println("Sending response");
 					byte[] msg2send = convert2Bytes(response);
 					dos.writeInt(msg2send.length);
 					dos.write(msg2send);
@@ -492,17 +514,12 @@ public class SockServer {
 				.sorted(Map.Entry.comparingByValue())
 				.map(Map.Entry::getKey)
 				.collect(Collectors.toList());
-		//Map<String, String> sorted = sortByValue(leaderBoards);
+		revlist(sorted);
 		JSONArray top5 = new JSONArray();
-
-		int sortedLen = sorted.size();
-		int bound = 5;
-		if (sortedLen < bound) {
-			bound = sortedLen;
-		}
-		int rank = 1;
 		int counter2 = 0;
-		for (int i = bound - 1; i >= bound - 6; i--) {
+		int rank = 1;
+		int sortedLen = sorted.size();
+		for (int i = 0; i < 5; i++) {
 			JSONObject p = new JSONObject();
 			if (counter2 < sortedLen) {
 				String name = sorted.get(i);
@@ -528,16 +545,16 @@ public class SockServer {
 	}
 
 
-	public static <K, V extends Comparable<? super V>> Map<K, V> sortByValue(Map<K, V> map) {
-		List<Map.Entry<K, V>> list = new ArrayList<>(map.entrySet());
-		list.sort(Map.Entry.comparingByValue());
-
-		Map<K, V> result = new LinkedHashMap<>();
-		for (Map.Entry<K, V> entry : list) {
-			result.put(entry.getKey(), entry.getValue());
+	public static <String> void revlist(List<String> list) {
+		if (list.size() <=1 || list == null) {
+			return;
 		}
 
-		return result;
+		String value = list.remove(0);
+
+		revlist(list);
+
+		list.add(value);
 	}
 
 }
