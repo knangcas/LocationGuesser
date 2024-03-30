@@ -45,6 +45,10 @@ public class Response {
             bonus = false;
             outputPanel.setPoints(score);
         } else if (type.equals("+1")) {
+            //addScore(1);
+
+
+            //bonus point implementation.
             if (bonus) {
                 addScore(2);
             } else {
@@ -73,10 +77,11 @@ public class Response {
             }
 
 
-
             ImageIcon img = readImg(json);
             picPanel.insertImageI(0,0,img);
             System.out.println("Success. Score + 1. New image loaded. ");
+
+
             if (streak > 0) {
                 if (streak == 1) {
                     outputPanel.appendOutput("WOW! 20 in a row! Correct guesses are now double points!");
@@ -86,6 +91,10 @@ public class Response {
             } else {
                 outputPanel.appendOutput("Correct!");
             }
+
+
+
+            //outputPanel.appendOutput("Correct!");
             outputPanel.setPoints(score);
         } else if (type.equals("wrong guess")) {
             outputPanel.appendOutput("Incorrect!");
