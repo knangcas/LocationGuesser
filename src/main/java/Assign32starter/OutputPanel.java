@@ -37,7 +37,7 @@ public class OutputPanel extends JPanel {
     // executes when the submit button is clicked
     void submitClicked();
   }
-  private static JLabel pointsLabel = new JLabel("Current Points this round: 0");
+  private static JLabel pointsLabel = new JLabel("Points: 0");
   private JTextField input;
   private JButton submit;
   private JTextArea area;
@@ -46,6 +46,8 @@ public class OutputPanel extends JPanel {
   static Timer timer;
 
   static int seconds;
+
+  static int ogseconds;
 
   static JLabel cd;
 
@@ -71,14 +73,15 @@ public class OutputPanel extends JPanel {
     c.weightx = 0.3;
     add(this.pointsLabel, c);
     pointsLabel.setForeground(Color.white);
+    pointsLabel.setFont(new Font("Arial", Font.BOLD, 28));
     c = new GridBagConstraints();
     c.fill = GridBagConstraints.BOTH;
     c.gridx = 1;
     c.gridy = 0;
     //c.gridwidth = 2;
     //c.weightx = 0.3;
-    seconds = 30;
-    cd = new JLabel("30");
+    seconds = 0;
+    cd = new JLabel(""+seconds);
     cd.setForeground(Color.WHITE);
     cd.setHorizontalAlignment(JLabel.RIGHT);
     cdTimer();
@@ -198,11 +201,11 @@ public class OutputPanel extends JPanel {
   }
 
   public static void timerReset() {
-    seconds = 30;
+    cd.setText(""+ogseconds);
     cd.setFont(new Font("Arial", Font.BOLD, 24));
     cd.setForeground(Color.white);
     score = 0;
-    pointsLabel.setText("Current Points this round: 0");
+    pointsLabel.setText("Points: 0");
   }
 
   private void timerEnd() {
@@ -226,6 +229,15 @@ public class OutputPanel extends JPanel {
 
   public static void timerStop() {
     timer.stop();
+  }
+
+  public static void setTime(int n) {
+    seconds = n;
+    ogseconds = n;
+  }
+
+  public static int getTime() {
+    return ogseconds;
   }
 
 
@@ -255,7 +267,7 @@ public class OutputPanel extends JPanel {
    * @param points current points in round
    */
   public void setPoints(int points) {
-    pointsLabel.setText("Current Points this round: " + points);
+    pointsLabel.setText("Points: " + points);
     score = points;
   }
 

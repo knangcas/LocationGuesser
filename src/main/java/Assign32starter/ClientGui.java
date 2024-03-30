@@ -64,6 +64,10 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 
 	String name;
 
+	int timer;
+
+	boolean gameStarted;
+
 
 
 	/**
@@ -73,11 +77,12 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 	public ClientGui(String host, int port) throws IOException {
 		this.host = host;
 		this.port = port;
+		gameStarted = false;
 
-		frame = new JFrame("Name the location!");
+		frame = new JFrame("Name The Place 2024!");
 		frame.getContentPane().setBackground(Color.BLACK);
 		frame.setLayout(new GridBagLayout());
-		frame.setMinimumSize(new Dimension(700, 500));
+		frame.setMinimumSize(new Dimension(563, 700));
 		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 
@@ -110,6 +115,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		//currentMess = "{'type': 'start'}"; // very initial start message for the connection
 		JSONObject request = new JSONObject();
 		request.put("type", "start");
+		request.put("status", 0);
 		//request.put("type", "start");
 
 		byte[] sendThis = convert2Bytes(request);
@@ -170,10 +176,11 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		close(); //closing the connection to server
 
 		JDialog welcome = new JDialog();
-		welcome.setTitle("name that location v1.0");
+		welcome.setResizable(false);
+		welcome.setTitle("Name The Place 2024!");
 		welcome.setModal(true);
 		welcome.getContentPane().setBackground(Color.WHITE);
-		welcome.setSize(500,500);
+		welcome.setSize(700,700);
 		welcome.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		welcome.setLayout(new GridBagLayout());
 
@@ -232,7 +239,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Showing leaderboard");
 				outputPanel.setInputText("leaderboard");
-				start = 1;
+				start = 2;
 				submitClicked();
 				start = 0;
 			}
@@ -244,7 +251,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Quitting...");
 				outputPanel.setInputText("quit");
-				start = 1;
+				start = 2;
 				submitClicked();
 				welcome.dispose();
 			}
@@ -338,7 +345,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 	@Override
 	public void submitClicked() {
 		try {
-			open(); // opening a server connection again
+
 			System.out.println("Submit clicked. Sending message");
 
 
@@ -347,15 +354,56 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			if (start > 0) {
 				input = input.toLowerCase();
 			}
-			// TODO evaluate the input from above and create a request for client.
+			if (input.equals("start")) {
+
+				boolean check = false;
+				while (!check) {
+					String time = null;
+					time = JOptionPane.showInputDialog("How many seconds would you like to play for?");
+
+					if (time == null && input.equals("start")) {
+						outputPanel.appendOutput("No time entered. Choose an option: Start (Starts new game), Leaderboard (Shows top 5 scores), Quit (shuts down game)");
+						outputPanel.clearInputText();
+						return;
+					}
+					try {
+						timer = Integer.parseInt(time);
+						if (timer < 5) {
+							throw new NumberFormatException("Number less than 5");
+						}
+						check = true;
+						OutputPanel.setTime(timer);
+					} catch (NumberFormatException nfe) {
+						nfe.printStackTrace();
+						JOptionPane.showMessageDialog(null, "Please enter a number. Minimum = 5 seconds", "Error", JOptionPane.ERROR_MESSAGE);
+					}
+
+				}
+
+			}
+
+			open(); // opening a server connection again
 			JSONObject send = new JSONObject();
 			// send request to server
 			if (start == 0) {
 				send.put("type", "start");
-				send.put("message", input);
-				start++;
+				send.put("status", 0);
+				send.put("name", input);
+				start+=2;
 			} else {
 				send.put("type", "input");
+			}
+
+			if (start == 1) {
+				gameStarted = true;
+				send.put("status", 1);
+			}
+
+			if (start == 2) {
+				gameStarted = false;
+				if (!send.has("name")) {
+					send.put("status", 2);
+				}
 			}
 			send.put("input", input);
 			System.out.println(send);
@@ -384,14 +432,21 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 				if (!res.has("data")) {
 					System.out.println(res);
 				}
+				if (res.has("type") && res.getString("type").equals("new game")) {
+					start = 1;
+					gameStarted = true;
+				}
+
 
 				servReply = Response.evaluateResponse(res, picPanel, outputPanel);
 				score = Response.getScore();
 
-				if (servReply !=null) {
+				if (servReply!=null && servReply.has("error")) {
+					System.out.println("Error occurred. Improper protocol");
+					JOptionPane.showMessageDialog(null, "An error occurred.", "Error", JOptionPane.ERROR_MESSAGE);
+				} else if (servReply !=null) {
 					System.out.println("auto reply to server");
 					reply2Server(servReply);
-
 				}
 
 			} catch (IOException e) {
@@ -425,7 +480,15 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 
 	//just in case
 	public void reply2Server(JSONObject jo) {
+		if (jo.has("input") && jo.getString("input").equals("quit2")) {
+			close();
+			System.exit(0);
+		}
 
+		if (jo.has("score")) {
+			gameStarted = false;
+			start=2;
+		}
 		byte[] sendThis = convert2Bytes(jo);
 		try {
 			os.writeInt(sendThis.length);
@@ -436,10 +499,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		}
 		outputPanel.clearInputText();
 
-		if (jo.has("input") && jo.getString("input").equals("quit2")) {
-			close();
-			System.exit(0);
-		}
+
 		String r;
 		JSONObject res;
 		try {

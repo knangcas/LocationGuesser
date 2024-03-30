@@ -40,13 +40,13 @@ public class SockServer {
 
 	static int caIndex;
 
-	static int score;
+	static String score;
 
 	static String name;
 
-	static boolean gameStarted;
+	//static boolean gameStarted;
 
-	static boolean previouslyPlayed;
+	//static boolean previouslyPlayed;
 
 	static int streak = 0;
 
@@ -56,8 +56,8 @@ public class SockServer {
 		currentAnswer = new String[]{"ASU", "Berlin", "Paris"};
 		direction = 1;
 		rdg = new RandomDataGenerator();
-		gameStarted = false;
-		previouslyPlayed = false;
+		//gameStarted = false;
+		//previouslyPlayed = false;
 
 		caIndex = rdg.nextInt(0, currentAnswer.length-1);
 
@@ -116,7 +116,6 @@ public class SockServer {
 					}
 
 					JSONObject response = isValid(s);
-
 					if (response.has("ok")) {      //if isValid gives "ok" key (indicating invalid JSON), skip the rest of the code, and iterate loop again (continue).
 						writeOut(response);
 						continue;
@@ -124,15 +123,20 @@ public class SockServer {
 					System.out.println("Got a request");
 					System.out.println(s);
 					JSONObject request = new JSONObject(s);
-
 					response = testField(request, "type", null);
 					if (!response.getBoolean("ok")) {    // no "type" header provided
 						response = noType(request);
 						writeOut(response);
 						continue;
 					}
+					response = testField(request, "status", null);
+					if (!response.getBoolean("ok")) {    // no "type" header provided
+						response = noType(request);
+						writeOut(response);
+						continue;
+					}
 
-					if (request.getString("type").equals("input") && gameStarted) {
+					if (request.getString("type").equals("input") && request.getInt("status") == 1) {
 						//TODO
 						JSONObject test = testField(request, "input", "input");
 						if (!test.getBoolean("ok")) {
@@ -167,11 +171,11 @@ public class SockServer {
 						} else if (input.equals("gover!revog")) {
 							if (!request.has("score")) {
 								System.out.println("Acknowledging Game Over");
-								response.put("type", "ok");
-								gameStarted = false;
+								//response.put("message", "")
+								//gameStarted = false;
 								streak = 0;
-							} else {
-
+								sendImg("img/gover.png", response);
+								response.put("type", "ok");
 							}
 						} else if (input.equals(currentAnswer[caIndex].toLowerCase())) {
 							nextIndex();
@@ -196,7 +200,7 @@ public class SockServer {
 							System.out.println(name + "answered incorrectly. Correct answer is " + currentAnswer[caIndex]);
 						}
 
-					} else if (request.getString("type").equals("input") && !gameStarted) {
+					} else if (request.getString("type").equals("input") && request.getInt("status") == 2) {
 						String input = request.getString("input");
 
 						if (input.equals("leaderboard")) {
@@ -205,28 +209,24 @@ public class SockServer {
 							response.put("data", lbtop5);
 							System.out.println("sending back top5 leaders");
 							System.out.println(lbtop5);
-						} else if (input.equals("start") && !previouslyPlayed) {
-							gameStarted = true;
-							response = fetchImage(currentAnswer[caIndex], 1, response);
-							response.put("type", "new game");
-						} else if (input.equals("new game")) {
+						} else if (input.equals("start")) {
 							streak = 0;
-							gameStarted = true;
-							previouslyPlayed = true;
+							//gameStarted = true;
+							//previouslyPlayed = true;
 							System.out.println("new game started");
 							response = fetchImage(currentAnswer[caIndex], 1, response);
 							response.put("type", "new game");
 						} else if (input.equals("quit")) {
 							response.put("type", "quit");
 						} else if (input.equals("quit2")) {
-							System.out.println("quitting game.");
-							System.exit(0);
+							System.out.println("quitting game and disconnecting client...");
 						} else if (input.equals("gover!revog")) {
 							//name = request.getString("name");
 							System.out.println("Storing score");
-							score = request.getInt("score");
+							score = request.getString("score");
+							double score2 = Double.parseDouble(score);
 							if (leaderBoards.get(name) != null) {
-								if (score > Integer.parseInt(leaderBoards.get(name))) {
+								if (score2 > Double.parseDouble(leaderBoards.get(name))) {
 									leaderBoards.put(name, String.valueOf(score));
 									writeJSON();
 									System.out.println("Updated leaders.json with new high score");
@@ -236,18 +236,17 @@ public class SockServer {
 								writeJSON();
 								System.out.println("Updating leaders.json");
 							}
-							previouslyPlayed = true;
+							//previouslyPlayed = true;
 							response.put("type", "start2");
 							response.put("message", "Thanks for playing. Select an option");
-						} else if (previouslyPlayed){
-							response.put("type", "notplayingCommands");
+
 						} else {
 							response.put("type", "notplayingCommandsIntro");
 						}
 
 
-					} else if (request.getString("type").equals("start")) {
-						if (!request.has("message")) {
+					} else if (request.getString("type").equals("start") && request.getInt("status") == 0) {
+						if (!request.has("name")) {
 							System.out.println("Got a start!");
 							response.put("type", "start");
 							response.put("message", "Hello, what is your name?");
@@ -255,8 +254,8 @@ public class SockServer {
 							sendImg("img/hi.png", response);
 							response.put("type", "start");
 						} else {
-							name = request.getString("message");
-							System.out.println(name);
+							name = request.getString("name");
+							System.out.println("Player name: " + name);
 							response.put("type", "start");
 							response.put("message", "Hello " + name + " What would you like to do?");
 							//if (!leaderBoards.containsKey(name)) {
@@ -272,6 +271,11 @@ public class SockServer {
 					//}
 
 					System.out.println("Sending response");
+					if (!response.has("data")) {
+						System.out.println(response);
+					} else {
+						System.out.println("sent response, data too big (image) to print to console");
+					}
 					byte[] msg2send = convert2Bytes(response);
 					dos.writeInt(msg2send.length);
 					dos.write(msg2send);
@@ -488,7 +492,7 @@ public class SockServer {
 		for (String player : leaderBoards.keySet()){
 			JSONObject object = new JSONObject();
 			object.put("name", player);
-			object.put("score", Integer.parseInt(leaderBoards.get(player)));
+			object.put("score", Double.parseDouble(leaderBoards.get(player)));
 			playerList.put(i, object);
 			i++;
 		}
@@ -523,7 +527,7 @@ public class SockServer {
 			JSONObject p = new JSONObject();
 			if (counter2 < sortedLen) {
 				String name = sorted.get(i);
-				int score = Integer.parseInt(leaderBoards.get(name));
+				double score = Double.parseDouble(leaderBoards.get(name));
 				p.put("name", name);
 				p.put("score", score);
 				p.put("rank", rank);

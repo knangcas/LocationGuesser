@@ -4,7 +4,7 @@ public class Player {
 
     private String name;
 
-    private int score;
+    private double score;
 
     Player() {
 
@@ -23,7 +23,7 @@ public class Player {
         this.name = name;
     }
 
-    public int getScore() {
+    public double getScore() {
         return this.score;
     }
     public void setScore(int score) {
