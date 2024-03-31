@@ -4,12 +4,12 @@ public class Player {
 
     private String name;
 
-    private double score;
+    private String score;
 
     Player() {
     }
 
-    Player(String name, int score) {
+    Player(String name, String score) {
         this.score = score;
         this.name = name;
     }
@@ -22,10 +22,10 @@ public class Player {
         this.name = name;
     }
 
-    public double getScore() {
+    public String getScore() {
         return this.score;
     }
-    public void setScore(int score) {
+    public void setScore(String score) {
         this.score = score;
     }
 

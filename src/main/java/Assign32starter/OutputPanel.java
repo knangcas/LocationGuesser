@@ -65,14 +65,14 @@ public class OutputPanel extends JPanel {
     GridBagConstraints c = new GridBagConstraints();
 
 
-    this.setBackground(Color.black);
+    this.setBackground(Color.WHITE);
     c = new GridBagConstraints();
     c.fill = GridBagConstraints.HORIZONTAL;
     c.gridx = 0;
     c.gridy = 0;
     c.weightx = 0.3;
     add(this.pointsLabel, c);
-    pointsLabel.setForeground(Color.white);
+    pointsLabel.setForeground(Color.BLACK);
     pointsLabel.setFont(new Font("Arial", Font.BOLD, 28));
     c = new GridBagConstraints();
     c.fill = GridBagConstraints.BOTH;

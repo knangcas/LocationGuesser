@@ -91,7 +91,8 @@ public class Response {
                 response.put("input", "quit2");
                 return response;
             } else if (type.equals("ok")) {
-                JOptionPane.showMessageDialog(null, "Time ran out. Your score: " + getScore(), "Game Over", JOptionPane.INFORMATION_MESSAGE);
+                double calculatedScore = Double.parseDouble(calculateScore(json.getInt("time")));
+                JOptionPane.showMessageDialog(null, String.format("Time ran out. Points: %d -- Calculated score: %.2f", getScore(), calculatedScore), "Game Over", JOptionPane.INFORMATION_MESSAGE);
                 System.out.println("sending score...");
                 ImageIcon img = readImg(json);
                 picPanel.insertImageI(0,0,img);

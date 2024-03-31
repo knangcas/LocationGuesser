@@ -38,8 +38,10 @@ public class Leaderboard {
             double score = player.getDouble("score");
             int rank = player.getInt("rank");
 
-            String playerStr = "" + rank + ") " + score + " --" + name;
-            op.appendOutput(playerStr);
+            //String playerStr = "" + rank + ") " + score + " --" + name;
+
+
+            op.appendOutput(String.format("%d) %.2f -- %s", rank, score, name));
         }
 
 
@@ -66,7 +68,7 @@ public class Leaderboard {
         for(int i = 0; i < 5; i++) {
             JSONObject player= (JSONObject) array.get(i);
             lboard5[i] = player.getString("name");
-            score5[i] = player.getInt("score");
+            score5[i] = player.getDouble("score");
         }
 
         //sort(score5, lboard5);
@@ -103,7 +105,7 @@ public class Leaderboard {
 
 
 
-        JLabel result1 = new JLabel("1) "+ score5[0] + "--" + lboard5[0]);
+        JLabel result1 = new JLabel(String.format("1) %.2f -- %s", score5[0], lboard5[0]));
         result1.setHorizontalAlignment(JLabel.RIGHT);
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -111,28 +113,28 @@ public class Leaderboard {
         gbc.gridx = 0;
         lb.add(result1, gbc);
 
-        JLabel result2 = new JLabel("2) "+ score5[1] + "--" + lboard5[1]);
+        JLabel result2 = new JLabel(String.format("2) %.2f -- %s", score5[1], lboard5[1]));
         result2.setHorizontalAlignment(JLabel.RIGHT);
         gbc = new GridBagConstraints();
         gbc.gridy = 2;
         gbc.gridx = 0;
         lb.add(result2, gbc);
 
-        JLabel result3 = new JLabel("3) "+ score5[2] + "--" + lboard5[2]);
+        JLabel result3 = new JLabel(String.format("3) %.2f -- %s", score5[2], lboard5[2]));
         result3.setHorizontalAlignment(JLabel.RIGHT);
         gbc = new GridBagConstraints();
         gbc.gridy = 3;
         gbc.gridx = 0;
         lb.add(result3, gbc);
 
-        JLabel result4 = new JLabel("4) "+ score5[3] + "--" + lboard5[3]);
+        JLabel result4 = new JLabel(String.format("4) %.2f -- %s", score5[3], lboard5[3]));
         result4.setHorizontalAlignment(JLabel.RIGHT);
         gbc = new GridBagConstraints();
         gbc.gridy = 4;
         gbc.gridx = 0;
         lb.add(result4, gbc);
 
-        JLabel result5 = new JLabel("5) "+ score5[4] + "--" + lboard5[4]);
+        JLabel result5 = new JLabel(String.format("5) %.2f -- %s", score5[4], lboard5[4]));
         result5.setHorizontalAlignment(JLabel.RIGHT);
         gbc = new GridBagConstraints();
         gbc.gridy = 5;

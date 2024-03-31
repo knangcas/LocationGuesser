@@ -261,7 +261,7 @@ public class SockServer {
 							double score2 = Double.parseDouble(score);
 							if (leaderBoards.get(name) != null) {
 								if (score2 > Double.parseDouble(leaderBoards.get(name))) {
-									leaderBoards.put(name, String.valueOf(score));
+									leaderBoards.put(name, String.valueOf(score2));
 									writeJSON();
 									System.out.println("Updated leaders.json with new high score");
 								}
@@ -514,7 +514,7 @@ public class SockServer {
 			players = mapper.readValue(fileObj, new TypeReference<List<Player>>() {
 			});
 			for (Player i : players) {
-				leaderBoards.put(i.getName(), String.valueOf(i.getScore()));
+				leaderBoards.put(i.getName(), i.getScore());
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -563,6 +563,7 @@ public class SockServer {
 			JSONObject p = new JSONObject();
 			String name = sorted.get(i);
 			double score = Double.parseDouble(leaderBoards.get(name));
+			System.out.println("putting " + leaderBoards.get(name) + "into jsonarray");
 			p.put("name", name);
 			p.put("score", score);
 			p.put("rank", i + 1);

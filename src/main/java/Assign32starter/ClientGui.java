@@ -61,9 +61,9 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		gameStarted = false;
 
 		frame = new JFrame("Name The Place 2024!");
-		frame.getContentPane().setBackground(Color.BLACK);
+		frame.getContentPane().setBackground(Color.WHITE);
 		frame.setLayout(new GridBagLayout());
-		frame.setMinimumSize(new Dimension(563, 700));
+		frame.setMinimumSize(new Dimension(600, 750));
 		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 
