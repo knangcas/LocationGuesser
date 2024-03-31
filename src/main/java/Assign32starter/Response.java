@@ -34,7 +34,10 @@ public class Response {
                 picPanel.insertImageI(0, 0, img);
                 System.out.println("recieved image");
             } else if (type.equals("leaderboards")) {
-                Leaderboard.leaderboard(json);
+                boolean splash = Boolean.parseBoolean(json.getString("message"));
+                Leaderboard.leaderboard(json, splash);
+            } else if (type.equals("leaderboardsFULL")) {
+                Leaderboard.leaderboardFULL(json, outputPanel);
             } else if (type.equals("new game")) {
                 picPanel.newGame(1);
                 int time = json.getInt("time");
@@ -66,7 +69,7 @@ public class Response {
                 outputPanel.appendOutput("Incorrect! Try Again");
             } else if (type.equals("start") && !json.has("data")) {
                 outputPanel.appendOutput(json.getString("message"));
-                outputPanel.appendOutput("Options: Start (Starts the game), Leaderboard (Shows top 5 scores), Quit (shuts down game)");
+                outputPanel.appendOutput("Options: Start (Starts the game), Leaderboard (Shows top 5 scores), Leaderboard Full (Shows full leaderboard), Quit (shuts down game)");
             } else if (type.equals("start")) {
                 outputPanel.appendOutput(json.getString("message"));
                 ImageIcon img = readImg(json);
@@ -74,12 +77,12 @@ public class Response {
                 System.out.println("recieved image");
             } else if (type.equals("start2")) {
                 outputPanel.appendOutput(json.getString("message"));
-                outputPanel.appendOutput("Options: Start (Starts the game), Leaderboard (shows leaderboard), Quit (shuts down game)");
+                outputPanel.appendOutput("Options: Start (Starts the game), Leaderboard (Shows top 5 scores), Leaderboard Full (Shows full leaderboard), Quit (shuts down game)");
             } else if (type.equals("notplayingCommands")) {
-                JOptionPane.showMessageDialog(null, "Command not recognized. Options: Start, Leaderboard, Quit", "Invalid Command", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Command not recognized. Options: Start, Leaderboard, Leaderboard Full, Quit", "Invalid Command", JOptionPane.INFORMATION_MESSAGE);
                 outputPanel.appendOutput("Invalid command");
             } else if (type.equals("notplayingCommandsIntro")) {
-                JOptionPane.showMessageDialog(null, "Command not recognized. Options: Start, Leaderboard, Quit", "Invalid Command", JOptionPane.INFORMATION_MESSAGE);
+                JOptionPane.showMessageDialog(null, "Command not recognized. Options: Start, Leaderboard, Leaderboard Full, Quit", "Invalid Command", JOptionPane.INFORMATION_MESSAGE);
                 outputPanel.appendOutput("Invalid command");
             } else if (type.equals("quit")) {
                 System.out.println("Quitting game.");

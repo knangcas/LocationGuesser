@@ -225,6 +225,20 @@ public class SockServer {
 							response.put("data", lbtop5);
 							System.out.println("sending back top5 leaders");
 							System.out.println(lbtop5);
+							response.put("message", "false");
+						} else if (input.equals("leaderboardsplash")) {
+							response.put("type", "leaderboards");
+							JSONArray lbtop5 = getTop5lb();
+							response.put("data", lbtop5);
+							System.out.println("sending back top5 leaders");
+							System.out.println(lbtop5);
+							response.put("message", "true");
+						} else if (input.equals("leaderboard full")) {
+							response.put("type", "leaderboardsFULL");
+							JSONArray full = getAllScores();
+							response.put("data", full);
+							System.out.println("Sending full leaderboard");
+							System.out.println(full);
 						} else if (input.equals("start")) {
 							streak = 0;
 							//gameStarted = true;
@@ -441,14 +455,14 @@ public class SockServer {
 			} catch (JSONException ne) {
 				JSONObject res = new JSONObject();
 				res.put("ok", false);
-				res.put("message", "req not JSON");
+				res.put("message", "req not JSONObject. Please see documentation");
 				return res;
 			}
 		}
 		return new JSONObject();
 	}
 
-	static void writeOut(JSONObject res) {
+	private static void writeOut(JSONObject res) {
 		try {
 			os.writeUTF(res.toString());  //has to be JSON format.
 			// make sure it wrote and doesn't get cached in a buffer
@@ -458,7 +472,7 @@ public class SockServer {
 
 	}
 
-	static JSONObject testField(JSONObject req, String key, String type){
+	private static JSONObject testField(JSONObject req, String key, String type){
 		JSONObject res = new JSONObject();
 		if (type!=null) {
 			res.put("type", type);
@@ -466,7 +480,7 @@ public class SockServer {
 		// field does not exist
 		if (!req.has(key)){
 			res.put("ok", false);
-			res.put("message", "Field " + key + " does not exist in request");
+			res.put("message", "Field " + key + " does not exist in request. Please see documentation for all valid keys");
 			return res;
 		}
 		return res.put("ok", true);
@@ -476,7 +490,7 @@ public class SockServer {
 		System.out.println("No type request: " + req.toString());
 		JSONObject res = new JSONObject();
 		res.put("ok", false);
-		res.put("message", "No request type was given.");
+		res.put("message", "JSON must include \"type\", <String>");
 		return res;
 	}
 
@@ -530,6 +544,28 @@ public class SockServer {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
+	}
+
+	static JSONArray getAllScores() {
+		List<String> sorted = leaderBoards.entrySet().stream()
+				.sorted(Map.Entry.comparingByValue())
+				.map(Map.Entry::getKey)
+				.collect(Collectors.toList());
+		revlist(sorted);
+		JSONArray allScores = new JSONArray();
+
+		for (int i = 0; i < sorted.size(); i++) {
+			JSONObject p = new JSONObject();
+			String name = sorted.get(i);
+			double score = Double.parseDouble(leaderBoards.get(name));
+			p.put("name", name);
+			p.put("score", score);
+			p.put("rank", i + 1);
+			allScores.put(p);
+		}
+		return allScores;
+
+
 	}
 
 	static JSONArray getTop5lb() {

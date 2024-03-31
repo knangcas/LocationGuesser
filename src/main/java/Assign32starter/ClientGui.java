@@ -238,7 +238,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				System.out.println("Showing leaderboard");
-				outputPanel.setInputText("leaderboard");
+				outputPanel.setInputText("leaderboardSplash");
 				start = 2;
 				submitClicked();
 				start = 0;
