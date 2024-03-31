@@ -21,13 +21,18 @@ dependencies {
 
 task runClient(type: JavaExec) {
   group 'gui'
-  description 'Displays a GUI for a game of concentration'
+  description 'Displays a GUI for a game of name the place'
 
   classpath = sourceSets.main.runtimeClasspath
 
   main = 'Assign32starter.ClientGui'
   standardInput = System.in
-  args "1"
+  if (project.hasProperty("host") && project.hasProperty("port")) {
+      args(project.getProperty('host'), project.getProperty('port'))
+  } else {
+      args "localhost"
+      args 8080
+  }
 }
 
 task runServer(type: JavaExec) {
@@ -37,6 +42,13 @@ task runServer(type: JavaExec) {
   classpath = sourceSets.main.runtimeClasspath
   standardInput = System.in
   main = 'Assign32starter.SockServer'
+
+    if (project.hasProperty("port")) {
+        args(project.getProperty('port'));
+    } else {
+        args 8080
+    }
+
 }
 
 

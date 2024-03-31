@@ -64,37 +64,37 @@ public class Leaderboard {
 
 
 
-        JLabel result1 = new JLabel("1. Score: " + score[0] + " by " + lboard[0]);
-        result1.setHorizontalAlignment(JLabel.LEFT);
+        JLabel result1 = new JLabel("1) "+ score[0] + "--" + lboard[0]);
+        result1.setHorizontalAlignment(JLabel.RIGHT);
 
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridy = 1;
         gbc.gridx = 0;
         lb.add(result1, gbc);
 
-        JLabel result2 = new JLabel("2. Score: " + score[1] + " by " + lboard[1]);
-        result2.setHorizontalAlignment(JLabel.LEFT);
+        JLabel result2 = new JLabel("2) "+ score[1] + "--" + lboard[1]);
+        result2.setHorizontalAlignment(JLabel.RIGHT);
         gbc = new GridBagConstraints();
         gbc.gridy = 2;
         gbc.gridx = 0;
         lb.add(result2, gbc);
 
-        JLabel result3 = new JLabel("3. Score: " + score[2] + " by " + lboard[2]);
-        result3.setHorizontalAlignment(JLabel.LEFT);
+        JLabel result3 = new JLabel("3) "+ score[2] + "--" + lboard[2]);
+        result3.setHorizontalAlignment(JLabel.RIGHT);
         gbc = new GridBagConstraints();
         gbc.gridy = 3;
         gbc.gridx = 0;
         lb.add(result3, gbc);
 
-        JLabel result4 = new JLabel("4. Score: " + score[3] + " by " + lboard[3]);
-        result4.setHorizontalAlignment(JLabel.LEFT);
+        JLabel result4 = new JLabel("4) "+ score[3] + "--" + lboard[3]);
+        result4.setHorizontalAlignment(JLabel.RIGHT);
         gbc = new GridBagConstraints();
         gbc.gridy = 4;
         gbc.gridx = 0;
         lb.add(result4, gbc);
 
-        JLabel result5 = new JLabel("5. Score: " + score[4] + " by " + lboard[4]);
-        result5.setHorizontalAlignment(JLabel.LEFT);
+        JLabel result5 = new JLabel("5) "+ score[4] + "--" + lboard[4]);
+        result5.setHorizontalAlignment(JLabel.RIGHT);
         gbc = new GridBagConstraints();
         gbc.gridy = 5;
         gbc.gridx = 0;

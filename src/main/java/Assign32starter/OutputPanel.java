@@ -76,25 +76,18 @@ public class OutputPanel extends JPanel {
     pointsLabel.setFont(new Font("Arial", Font.BOLD, 28));
     c = new GridBagConstraints();
     c.fill = GridBagConstraints.BOTH;
-    c.gridx = 1;
+    c.gridx = 0;
     c.gridy = 0;
-    //c.gridwidth = 2;
-    //c.weightx = 0.3;
     seconds = 0;
+
+    // for onscreen timer, not needed in requirements :(
     cd = new JLabel(""+seconds);
     cd.setForeground(Color.WHITE);
     cd.setHorizontalAlignment(JLabel.RIGHT);
-    cdTimer();
-    add(cd, c);
+    //cdTimer();
+    //add(cd, c);
 
 
-    // c = new GridBagConstraints();
-    // c.fill = GridBagConstraints.HORIZONTAL;
-    // c.gridx = 1;
-    // c.gridy = 0;
-    // c.weightx = 0.3;
-    // JTextField textField = new JTextField("Hello tx");
-    // add(textField, c);
 
     c = new GridBagConstraints();
     c.fill = GridBagConstraints.HORIZONTAL;

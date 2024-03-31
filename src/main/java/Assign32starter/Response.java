@@ -37,11 +37,12 @@ public class Response {
                 Leaderboard.leaderboard(json);
             } else if (type.equals("new game")) {
                 picPanel.newGame(1);
-                outputPanel.appendOutput("Starting new game. You have 30 seconds!");
+                int time = json.getInt("time");
+                outputPanel.appendOutput("Starting new game. You have " + time + " seconds!");
                 ImageIcon img = readImg(json);
                 picPanel.insertImageI(0, 0, img);
-                OutputPanel.timerReset();
-                OutputPanel.timerStart();
+                //OutputPanel.timerReset();
+                //OutputPanel.timerStart();
                 score = 0;
                 bonus = false;
                 outputPanel.setPoints(score);
@@ -56,7 +57,7 @@ public class Response {
                 picPanel.insertImageI(0, 0, img);
                 System.out.println("Success. Score + 1. New image loaded. ");
                 if (streak > 0) {
-                    outputPanel.appendOutput("Amazing! " + streak + " in a row! (" + add + " bonus points!");
+                    outputPanel.appendOutput("Amazing! " + streak + " in a row!");
                 } else {
                     outputPanel.appendOutput("Correct!");
                 }
@@ -87,13 +88,14 @@ public class Response {
                 response.put("input", "quit2");
                 return response;
             } else if (type.equals("ok")) {
+                JOptionPane.showMessageDialog(null, "Time ran out. Your score: " + getScore(), "Game Over", JOptionPane.INFORMATION_MESSAGE);
                 System.out.println("sending score...");
                 ImageIcon img = readImg(json);
                 picPanel.insertImageI(0,0,img);
                 response.put("type", "input");
                 response.put("input", "gover!revog");
                 response.put("status", 2);
-                response.put("score", calculateScore());
+                response.put("score", calculateScore(json.getInt("time")));
                 return response;
             }
 
@@ -111,9 +113,9 @@ public class Response {
 
     }
 
-    static String calculateScore() {
+    static String calculateScore(int n) {
         int score = getScore();
-        int seconds = OutputPanel.getTime();
+        int seconds = n;
         double finalScore = ((double)score/(double)seconds) * 100;
 
         return String.valueOf(finalScore);

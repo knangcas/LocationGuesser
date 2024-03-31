@@ -345,7 +345,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 	@Override
 	public void submitClicked() {
 		try {
-
+			JSONObject send = new JSONObject();
 			System.out.println("Submit clicked. Sending message");
 
 
@@ -372,7 +372,9 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 							throw new NumberFormatException("Number less than 5");
 						}
 						check = true;
-						OutputPanel.setTime(timer);
+						//OutputPanel.setTime(timer);
+						send.put("time", time);
+
 					} catch (NumberFormatException nfe) {
 						nfe.printStackTrace();
 						JOptionPane.showMessageDialog(null, "Please enter a number. Minimum = 5 seconds", "Error", JOptionPane.ERROR_MESSAGE);
@@ -383,7 +385,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			}
 
 			open(); // opening a server connection again
-			JSONObject send = new JSONObject();
+
 			// send request to server
 			if (start == 0) {
 				send.put("type", "start");
@@ -393,6 +395,8 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			} else {
 				send.put("type", "input");
 			}
+
+
 
 			if (start == 1) {
 				gameStarted = true;
@@ -574,8 +578,8 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			BufferedImage img = ImageIO.read(file);
 			logo = new ImageIcon(img);
 
-			String host = "localhost";
-			int port = 9000;
+			String host = args[0];
+			int port = Integer.parseInt(args[1]);
 
 
 			ClientGui main = new ClientGui(host, port);

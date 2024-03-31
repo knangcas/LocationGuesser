@@ -1,6 +1,7 @@
 package Assign32starter;
 import java.net.*;
 import java.nio.charset.StandardCharsets;
+import java.sql.Time;
 import java.util.Base64;
 import java.util.Set;
 import java.util.Stack;
@@ -44,6 +45,12 @@ public class SockServer {
 
 	static String name;
 
+	static long startTime;
+
+	static long timeChosen;
+
+	static int port = 8080;
+
 	//static boolean gameStarted;
 
 	//static boolean previouslyPlayed;
@@ -62,10 +69,11 @@ public class SockServer {
 		caIndex = rdg.nextInt(0, currentAnswer.length-1);
 
 		try {
-
+			port = Integer.parseInt(args[0]);
 			//opening the socket here, just hard coded since this is just a bas example
-			ServerSocket serv = new ServerSocket(9000); // TODO, should not be hardcoded
-			System.out.println("Server ready for connetion");
+			ServerSocket serv = new ServerSocket(port);
+			System.out.println("Success. Hosting on port " + port);
+			System.out.println("Server ready for connection");
 
 			// placeholder for the person who wants to play a game
 			name = "";
@@ -98,6 +106,8 @@ public class SockServer {
 				boolean connected = true;
 
 				while (connected) {
+
+
 					String s = "";
 					getLeaders();
 					try {
@@ -114,6 +124,7 @@ public class SockServer {
 						connected = false;
 						continue;
 					}
+
 
 					JSONObject response = isValid(s);
 					if (response.has("ok")) {      //if isValid gives "ok" key (indicating invalid JSON), skip the rest of the code, and iterate loop again (continue).
@@ -137,7 +148,11 @@ public class SockServer {
 					}
 
 					if (request.getString("type").equals("input") && request.getInt("status") == 1) {
-						//TODO
+						long deadline = startTime + timeChosen;
+						if (System.currentTimeMillis() > deadline) {
+							request.put("input", "gover!revog");
+						}
+
 						JSONObject test = testField(request, "input", "input");
 						if (!test.getBoolean("ok")) {
 							response = noType(request);
@@ -176,6 +191,7 @@ public class SockServer {
 								streak = 0;
 								sendImg("img/gover.png", response);
 								response.put("type", "ok");
+								response.put("time", timeChosen/1000);
 							}
 						} else if (input.equals(currentAnswer[caIndex].toLowerCase())) {
 							nextIndex();
@@ -214,8 +230,12 @@ public class SockServer {
 							//gameStarted = true;
 							//previouslyPlayed = true;
 							System.out.println("new game started");
+
 							response = fetchImage(currentAnswer[caIndex], 1, response);
 							response.put("type", "new game");
+							response.put("time" , request.getInt("time"));
+							timeChosen = ((long) request.getInt("time")) * 1000;
+							startTime = System.currentTimeMillis();
 						} else if (input.equals("quit")) {
 							response.put("type", "quit");
 						} else if (input.equals("quit2")) {
@@ -403,6 +423,8 @@ public class SockServer {
 		}
 
 	}
+
+
 
 	public static JSONObject error(String err) {
 		JSONObject json = new JSONObject();
