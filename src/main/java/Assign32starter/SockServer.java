@@ -505,7 +505,7 @@ public class SockServer {
 	static void getLeaders() {
 		ObjectMapper mapper = new ObjectMapper();
 
-		File fileObj = new File("resources/leaders.json");
+		File fileObj = new File("resourcesServer/leaders.json");
 		if (fileObj == null) {
 			System.exit(1);
 		}
@@ -538,7 +538,7 @@ public class SockServer {
 	static void writeJSON() {
 
 		try {
-			FileWriter file = new FileWriter("resources/leaders.JSON");
+			FileWriter file = new FileWriter("resourcesServer/leaders.JSON");
 			file.write(returnArray().toString());
 			file.close();
 		} catch (Exception e) {
@@ -547,7 +547,12 @@ public class SockServer {
 	}
 
 	static JSONArray getAllScores() {
-		List<String> sorted = leaderBoards.entrySet().stream()
+
+		Map<String, Double> temp = new Hashtable<>();
+		for (String player : leaderBoards.keySet()) {
+			temp.put(player, Double.parseDouble(leaderBoards.get(player)));
+		}
+		List<String> sorted = temp.entrySet().stream()
 				.sorted(Map.Entry.comparingByValue())
 				.map(Map.Entry::getKey)
 				.collect(Collectors.toList());
@@ -572,11 +577,24 @@ public class SockServer {
 		int highest = 0;
 		int counter = 5;
 
-		List<String> sorted = leaderBoards.entrySet().stream()
+		//double[] scores = new double[leaderBoards.size()];
+		//String[] names = new String[leaderBoards.size()];
+
+
+
+		Map<String, Double> temp = new Hashtable<>();
+		for (String player : leaderBoards.keySet()) {
+			temp.put(player, Double.parseDouble(leaderBoards.get(player)));
+		}
+
+		List<String> sorted = temp.entrySet().stream()
 				.sorted(Map.Entry.comparingByValue())
 				.map(Map.Entry::getKey)
 				.collect(Collectors.toList());
+
 		revlist(sorted);
+
+
 		JSONArray top5 = new JSONArray();
 		int counter2 = 0;
 		int rank = 1;

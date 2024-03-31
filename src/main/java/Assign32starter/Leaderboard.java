@@ -10,6 +10,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.Arrays;
 
 public class Leaderboard {
 
@@ -41,6 +42,11 @@ public class Leaderboard {
             op.appendOutput(playerStr);
         }
 
+
+
+
+
+
         op.appendOutput("Leaderboard (All Players)");
         op.appendOutput("Options: Start (Starts the game), Leaderboard (Shows top 5 scores), Leaderboard Full (Shows full leaderboard), Quit (shuts down game)");
 
@@ -63,6 +69,8 @@ public class Leaderboard {
             score5[i] = player.getInt("score");
         }
 
+        //sort(score5, lboard5);
+
 
         JLabel trophyLabel = new JLabel();
 
@@ -80,7 +88,7 @@ public class Leaderboard {
 
 
         try {
-            File trophy = new File("resources/trophy.png");
+            File trophy = new File("resourcesClient/trophy.png");
             BufferedImage img = ImageIO.read(trophy);
             ImageIcon trophyDialog = new ImageIcon(img);
             trophyLabel.setIcon(trophyDialog);
@@ -162,6 +170,7 @@ public class Leaderboard {
 
 
     }
+
 
 
 

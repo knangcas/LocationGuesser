@@ -23,7 +23,7 @@ public class Response {
         score+=n;
     }
 
-    static JSONObject evaluateResponse(JSONObject json, PicturePanel picPanel, OutputPanel outputPanel) throws PicturePanel.InvalidCoordinateException, IOException, InterruptedException {
+    static JSONObject evaluateResponse(JSONObject json, PicturePanel picPanel, OutputPanel outputPanel) throws IOException, InterruptedException {
         if (json.has("type")) {
             String type = json.getString("type");
             JSONObject response = new JSONObject();

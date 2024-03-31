@@ -7,7 +7,6 @@ public class Player {
     private double score;
 
     Player() {
-
     }
 
     Player(String name, int score) {
@@ -29,6 +28,5 @@ public class Player {
     public void setScore(int score) {
         this.score = score;
     }
-
 
 }

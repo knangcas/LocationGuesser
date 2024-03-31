@@ -1,94 +1,275 @@
 # Assignment 3 Starter Code
 
-## Grid Image Maker Usage
+## Name The Place 2024
 
-### Terminal
+## Description (a)
+
+This project is a location guessing game. The user will be given
+a POV image on the screen, and the user can type "left", "right" to turn 90 degrees
+left or right as if they are in that exact spot. The user may also guess the location by typing in the location
+or simply skip by typing "next".
+
+### How to run (c)
+
+1. Run server.
 
 ```
-gradle runServer
+gradle runServer -Pport=port
 ```
 
+2. Run client.
 ```
-gradle runClient
+gradle runClient -Phost=host -Pport=port
+```
+3. If connection is made, splash will appear asking for user's name with a few options (leaderboard, quit)
+- note : leaderboard in splash only shows top 5. Full leaderboard available in game. 
+4. User enter's name, and press "Submit"
+5. User is greeted with a few options. 
+- Start: Start's the game. User will be prompted with how many seconds they would like to play. Minimum = 5;
+- Leaderboard: Shows the top 5 user scores. If 5 do not exist, placeholders are put with name PLAYER and score 0.
+- Leaderboard Full: Shows the full leaderboard in text area. 
+- Quit: disconnects from server and terminates game. 
+
+6. Once a game is started, user is able give the following commands:
+- left: move left 90 degrees for a view to your left.
+- right: move right 90 degrees for a view to your right.
+- next: skip the current location.
+- All other inputs will be considered a guess.
+
+7. If a guess is correct, 1 point is given. If a guess is given after timer has ran out on server side, server does not accept request (even if it's correct) and ends game.
+8. Game over splash screen is shown, and user is able to give the original commands again (Start, Leaderboard, Leaderboard Full, Quit).
+9. Leaderboards are updated.
+
+
+## Protocol (d)
+
+Protocol is sent with JSONObjects. 
+JSONObjects should be converted to bytes, then sent/recieved via DataOutputStream/DataInputStream.
+Server will convert the bytes back to a JSONObject. 
+
+### General Request
+
+```
+{ 
+  "type" : <string>,
+  "input" : <string>,
+  "status" : <int>
+}
+
+```
+The status will determine which branch the request will go to. 0 = initial start, 1 = playing game, 2 = menu
+### Initial Connection
+```
+{ 
+  "type" : "start",
+  "status" : 0 
+ }
 ```
 
-## GUI Usage
+### Name Request
+```
+{ 
+  "type" : "start",
+  "name" : <string>,
+  "status" : 0
+}
+```
 
-### Code
+### Start Game Request
+```
+{ 
+  "type" : "input",
+  "input" : "start",
+  "status" : 2
+}
+```
+### Leaderboard Request (Top 5)
+```
+{ 
+  "type" : "input",
+  "input" : "leaderboard",
+  "status" : 2
+}
+```
 
-1. Create an instance of the GUI
+### Leaderboard Request (Full)
+```
+{ 
+  "type" : "input",
+  "input" : "leaderboard full",
+  "status" : 2
+}
+```
 
-   ```
-   ClientGui main = new ClientGui();
-   ```
+### Quit
+```
+{ 
+  "type" : "input",
+  "input" : "quit",
+  "status" : 2
+}
+```
 
-2. Create a new game and give it a grid dimension
+### Left / Right / Next
+Replace value for "input" with "left", "right", or "next"
+```
+{ 
+  "type" : "input",
+  "input" : "left", 
+  "status" : 1
+}
+```
 
-   ```
-   // the pineapple example is 2, but choose whatever dimension of grid you want
-   // you can change the dimension to see how the grid changes size
-   main.newGame(2); 
-   ```
+### User Guess
+Replace value for "input" with any input. This will be considered a guess. 
+```
+{ 
+  "type" : "input",
+  "input" : <String>, 
+  "status" : 1
+}
+```
 
-*Depending on how you want to run the system, 3 and 4 can be run how you want*
+### GameOver
+```
+{
+   "type" : "input",
+   "input" : "gover!revog"
+   "status" : 1
+}
+```
 
-3. Insert image
+### General Return Messages
 
-   ```
-   // the filename is the path to an image
-   // the first coordinate(0) is the row to insert in to
-   // the second coordinate(1) is the column to insert in to
-   // you can change coordinates to see the image move around the box
-   main.insertImage("img/Pineapple-Upside-down-cake_0_1.jpg", 0, 1);
-   ```
+```
+{
+   "type" : <string>,
+   "message" : <string>
+}
+```
 
-4. Show GUI
+### Receiving an image
 
-   ```
-   // true makes the dialog modal meaning that all interaction allowed is 
-   //   in the windows methods.
-   // false makes the dialog a pop-up which allows the background program 
-   //   that spawned it to continue and process in the background.
-   main.show(true);
-   ```
+```
+{
+   "type" : "image",
+   "data" : <String>
+}
+```
 
-For the images: The numbering is alwas starting at 1 which is the "main" view, increasing numbers are always turning to the right. So 2 is a 90 degree right turn of 1, while 4 is a 90 degree left turn of 1. 
+### Receiving leaderboards
 
-### ClientGui.java
-#### Summary
+```
+{
+   "type" : "leaderboards",
+   "data" : JSONArray
+   "message" : <String>
+}
+```
 
-> This is the main GUI to display the picture grid. 
+### Receiving full leaderboard
 
-#### Methods
-  - show(boolean modal) :  Shows the GUI frame with the current state
-     * NOTE: modal means that it opens the GUI and suspends background processes. Processing still happens in the GUI If it is desired to continue processing in the background, set modal to false.
-   * newGame(int dimension) :  Start a new game with a grid of dimension x dimension size
-   * insertImage(String filename, int row, int col) :  Inserts an image into the grid, this is when you know the file name, use the PicturePanel insertImage if you have a ByteStream
-   * appendOutput(String message) :  Appends text to the output panel
-   * submitClicked() :  Button handler for the submit button in the output panel
+```
+{
+   "type" : "leaderboardsFULL",
+   "data" : JSONArray
+}
+```
 
-### PicturePanel.java
+### Correct Guess Response
 
-#### Summary
+```
+{
+   "type" : "+1",
+   "streak" : <int>
+   "data" : <String>
+}
+```
 
-> This is the image grid
+### Incorrect Guess Response
 
-#### Methods
+```
+{
+   "type" : "wrong guess",
+}
+```
 
-- newGame(int dimension) :  Reset the board and set grid size to dimension x dimension
-- insertImage(String fname, int row, int col) :  Insert an image at (col, row)
-- insertImage(ByteArrayInputStream fname, int row, int col) :  Insert an image at (col, row)
+### Error message (NOT JSON)
+```
+{
+   "ok" : false,
+   "message" : "request not JSONObject. Please see documentation"
+}
+```
 
-### OutputPanel.java
+### Error message (Unrecognized Key)
+```
+{
+   "ok" : false,
+   "message" :  "Field " + key + " does not exist in request. Please see documentation for all valid keys"
+}
+```
 
-#### Summary
+### Error message (Type not in key)
+```
+{
+   "ok" : false,
+   "message" : "No request type was given. JSON must include "type", <String>" "
+}
+```
 
-> This is the input box, submit button, and output text area panel
+### Error message (Unrecognized type)
+```
+{
+   "ok" : false,
+   "message" :  "Type " + givenType + " is not supported."
+}
+```
 
-#### Methods
+### Generic Error message
 
-- getInputText() :  Get the input text box text
-- setInputText(String newText) :  Set the input text box text
-- addEventHandlers(EventHandlers handlerObj) :  Add event listeners
-- appendOutput(String message) :  Add message to output text
+```
+{
+   "error" : <String>
+ 
+}
+```
+
+## Robust (e)
+The protocol here is very simple, yet robust. Requests will always have a "type". 
+- If the request is not a JSONObject, a return message will return explain the request must be a JSONObject.
+- If no type field is given, a message will return explaining that the request must have a type
+- If a unrecognized type is given, a message will return saying the value is not recognized. 
+
+
+## UDP? (f)
+Since UDPs do not guarantee delivery, there may have to be a cache of "backup" images if a response is not
+sent within a certain amount of time back to the client. The information when it comes to the message will stay the same
+for the most part. There can either be a backup cache, error handling (no response) or both. 
+
+
+## Requirements Met (b)
+From the requirements section in the document. 7.x refers to the bullet point. 
+- [x] 1
+- [x] 2
+- [x] 3
+- [x] 4
+- [x] 5 
+- [x] 6
+- [x] 7
+- [x] 7.1
+- [x] 7.2
+- [x] 7.3 
+- [x] 7.4
+- [x] 7.5
+- [x] 7.6
+- [x] 8
+- [x] 9
+- [x] 10
+- [x] 11
+- [x] 12
+
+
+
+
 

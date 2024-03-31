@@ -12,38 +12,19 @@ import java.io.*;
 import java.net.Socket;
 import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
-import java.util.Base64;
+
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
 
-/**
- * The ClientGui class is a GUI frontend that displays an image grid, an input text box,
- * a button, and a text area for status. 
- *
- * Methods of Interest
- * ----------------------
- * show(boolean modal) - Shows the GUI frame with current state
- *     -> modal means that it opens GUI and suspends background processes. 
- * 		  Processing still happens in the GUI. If it is desired to continue processing in the 
- *        background, set modal to false.
- * newGame(int dimension) - Start a new game with a grid of dimension x dimension size
- * insertImage(String filename, int row, int col) - Inserts an image into the grid
- * appendOutput(String message) - Appends text to the output panel
- * submitClicked() - Button handler for the submit button in the output panel
- *
- * Notes
- * -----------
- * > Does not show when created. show() must be called to show he GUI.
- *
- */
+
 public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 	JFrame frame;
 	PicturePanel picPanel;
 	OutputPanel outputPanel;
 	String currentMess;
 
-	TimerPanel timerPanel;
+
 
 	Socket sock;
 	OutputStream out;
@@ -107,56 +88,30 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 
 
 
-
 		picPanel.newGame(1);
-		//insertImage("img/ASU1.png", 0, 0);
 
-		open(); // opening server connection here
-		//currentMess = "{'type': 'start'}"; // very initial start message for the connection
+		open();
 		JSONObject request = new JSONObject();
 		request.put("type", "start");
 		request.put("status", 0);
-		//request.put("type", "start");
+
 
 		byte[] sendThis = convert2Bytes(request);
 		os.writeInt(sendThis.length);
 		os.write(sendThis);
 		os.flush();
-		//os.writeObject(request.toString());
-		//os.flush();
-
-		//String s = "";
-		/*try {
-			int inLen = in.readInt();
-			byte[] message = new byte[inLen];
-			in.readFully(message,0,message.length);
-
-			//os.writeObject(request.toString());
-			os.flush();
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
-
-		 */
 
 
 		int inLen = in.readInt();
 		byte[] message = new byte[inLen];
 		in.readFully(message,0,message.length);
 		String i;
-
 		i = convertFromBytes(message);
 
-
-		//byte[] responseBytes = NetworkUtils.Receive(in);
 		JSONObject res = new JSONObject(i);
 		System.out.println("Connection Successful");
 
 		ImageIcon ii = Response.readImg(res);
-		//outputPanel.appendOutput(res.getString("message"));
-
-
-
 
 		try {
 			picPanel.insertImageI(0, 0, ii);
@@ -165,14 +120,9 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			e.printStackTrace();
 		}
 
-		//String string = this.bufferedReader.readLine();
 		System.out.println("Got a connection to server");
-		//JSONObject json = new JSONObject(string);
-		; // putting the message in the outputpanel
 
-		// reading out the image (abstracted here as just a string)
-		System.out.println("Pretend I got an image: ");
-		/// would put image in picture panel
+
 		close(); //closing the connection to server
 
 		JDialog welcome = new JDialog();
@@ -197,7 +147,6 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		c.weightx = 0.75;
 		JTextField nameField = new JTextField();
 		nameField.setPreferredSize(new Dimension(180, 25));
-		//nameField.setSize(180, 50);
 		welcome.add(nameField, c);
 
 		JButton nameButton = new JButton("Submit");
@@ -221,8 +170,6 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		c.gridy = 5;
 		welcome.add(quitButton, c);
 
-
-
 		nameButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -245,7 +192,6 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			}
 		});
 
-
 		quitButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
@@ -263,15 +209,9 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		c.gridy = 0;
 		logoLabel.setIcon(logo);
 		welcome.add(logoLabel, c);
-
 		welcome.setLocationRelativeTo(null);
 		welcome.setVisible(true);
 
-
-
-
-
-		// Now Client interaction only happens when the submit button is used, see "submitClicked()" method
 	}
 
 	private static byte[] convert2Bytes(JSONObject jo) {
@@ -289,10 +229,6 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		return convert;
 	}
 
-	/**
-	 * Shows the current state in the GUI
-	 * @param makeModal - true to make a modal window, false disables modal behavior
-	 */
 	public void show(boolean makeModal) {
 		frame.pack();
 		//frame.setModal(makeModal);
@@ -301,55 +237,12 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 	}
 
 
-	/**
-	 * Creates a new game and set the size of the grid 
-	 * @param dimension - the size of the grid will be dimension x dimension
-	 * No changes should be needed here
-	 */
-
-
-	/**
-	 * Insert an image into the grid at position (col, row)
-	 *
-	 * @param filename - filename relative to the root directory
-	 * @param row - the row to insert into
-	 * @param col - the column to insert into
-	 * @return true if successful, false if an invalid coordinate was provided
-	 * @throws IOException An error occured with your image file
-	 */
-	public boolean insertImage(String filename, int row, int col) throws IOException {
-		System.out.println("Image insert");
-		String error = "";
-		try {
-			// insert the image
-			if (picPanel.insertImage(filename, row, col)) {
-				// put status in output
-				outputPanel.appendOutput("Inserting " + filename + " in position (" + row + ", " + col + ")"); // you can of course remove this
-				return true;
-			}
-			error = "File(\"" + filename + "\") not found.";
-		} catch(PicturePanel.InvalidCoordinateException e) {
-			// put error in output
-			error = e.toString();
-		}
-		outputPanel.appendOutput(error);
-		return false;
-	}
-
-	/**
-	 * Submit button handling
-	 *
-	 * TODO: This is where your logic will go or where you will call appropriate methods you write. 
-	 * Right now this method opens and closes the connection after every interaction, if you want to keep that or not is up to you. 
-	 */
 	@Override
 	public void submitClicked() {
 		try {
 			JSONObject send = new JSONObject();
 			System.out.println("Submit clicked. Sending message");
 
-
-			// Pulls the input box text
 			String input = outputPanel.getInputText();
 			if (start > 0) {
 				input = input.toLowerCase();
@@ -384,9 +277,9 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 
 			}
 
-			open(); // opening a server connection again
+			open();
 
-			// send request to server
+
 			if (start == 0) {
 				send.put("type", "start");
 				send.put("status", 0);
@@ -395,8 +288,6 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			} else {
 				send.put("type", "input");
 			}
-
-
 
 			if (start == 1) {
 				gameStarted = true;
@@ -441,7 +332,6 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 					gameStarted = true;
 				}
 
-
 				servReply = Response.evaluateResponse(res, picPanel, outputPanel);
 				score = Response.getScore();
 
@@ -452,37 +342,18 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 					System.out.println("auto reply to server");
 					reply2Server(servReply);
 				}
-
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
-			} catch (PicturePanel.InvalidCoordinateException e) {
-				throw new RuntimeException(e);
 			} catch (InterruptedException e) {
 				throw new RuntimeException(e);
 			}
-
-			// wait for an answer and handle accordingly
-		/*try {
-			System.out.println("Waiting on response");
-			String i = (String) in.readUTF();
-			JSONObject response = new JSONObject(i);
-			System.out.println("Got a response:" + response);
-			evaluateResponse(response);
-			//System.out.println(string);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-
-		 */
 			close();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
 
-	//just in case
 	public void reply2Server(JSONObject jo) {
 		if (jo.has("input") && jo.getString("input").equals("quit2")) {
 			close();
@@ -521,7 +392,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 			Response.evaluateResponse(res, picPanel, outputPanel);
 			score = Response.getScore();
 
-		} catch (IOException | PicturePanel.InvalidCoordinateException e) {
+		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (InterruptedException e) {
@@ -530,7 +401,6 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 
 
 	}
-
 
 	/**
 	 * Key listener for the input text box
@@ -569,12 +439,9 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 	}
 
 	public static void main(String[] args) throws IOException {
-		// create the frame
-
-
 
 		try {
-			File file = new File("resources/logo.png");
+			File file = new File("resourcesClient/logo.png");
 			BufferedImage img = ImageIO.read(file);
 			logo = new ImageIcon(img);
 
@@ -587,7 +454,6 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 
 
 		} catch (Exception e) {e.printStackTrace();}
-
 
 
 	}
