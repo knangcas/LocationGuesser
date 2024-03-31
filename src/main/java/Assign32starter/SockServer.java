@@ -291,7 +291,7 @@ public class SockServer {
 							name = request.getString("name");
 							System.out.println("Player name: " + name);
 							response.put("type", "start");
-							response.put("message", "Hello " + name + " What would you like to do?");
+							response.put("message", "Hello " + name + ", What would you like to do?");
 							//if (!leaderBoards.containsKey(name)) {
 							//leaderBoards.put(name, String.valueOf(0));
 							//}

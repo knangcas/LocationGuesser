@@ -141,9 +141,16 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		c.gridy = 1;
 		welcome.add(welcomeText, c);
 
+		JLabel welcomeText2 = new JLabel();
+		welcomeText2.setText("(Leave blank to play as Guest)");
 		c = new GridBagConstraints();
 		c.gridx = 0;
 		c.gridy = 2;
+		welcome.add(welcomeText2, c);
+
+		c = new GridBagConstraints();
+		c.gridx = 0;
+		c.gridy = 3;
 		c.weightx = 0.75;
 		JTextField nameField = new JTextField();
 		nameField.setPreferredSize(new Dimension(180, 25));
@@ -153,27 +160,30 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		nameButton.setPreferredSize(new Dimension(120, 25));
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 3;
+		c.gridy = 4;
 		welcome.add(nameButton, c);
 
 		JButton leaderButton = new JButton("Leaderboard");
 		leaderButton.setPreferredSize(new Dimension(120, 25));
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 4;
+		c.gridy = 5;
 		welcome.add(leaderButton, c);
 
 		JButton quitButton = new JButton("Quit");
 		quitButton.setPreferredSize(new Dimension(120, 25));
 		c = new GridBagConstraints();
 		c.gridx = 0;
-		c.gridy = 5;
+		c.gridy = 6;
 		welcome.add(quitButton, c);
 
 		nameButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				name = nameField.getText();
+				if (name.equals("")) {
+					name = "Guest";
+				}
 				outputPanel.setInputText(name);
 				System.out.println("Player's name is " + name);
 				submitClicked();
