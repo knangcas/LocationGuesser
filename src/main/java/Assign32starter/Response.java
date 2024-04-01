@@ -108,7 +108,9 @@ public class Response {
             JSONObject response = new JSONObject();
             if (json.has("ok") && !json.getBoolean("ok")) {
                 response.put("error", json.getString("message"));
+                System.exit(0);
             }
+
 
             return response;
         }

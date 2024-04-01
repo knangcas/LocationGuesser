@@ -128,7 +128,7 @@ public class SockServer {
 
 					JSONObject response = isValid(s);
 					if (response.has("ok")) {      //if isValid gives "ok" key (indicating invalid JSON), skip the rest of the code, and iterate loop again (continue).
-						writeOut(response);
+						writeOut(response, dos);
 						continue;
 					}
 					System.out.println("Got a request");
@@ -137,13 +137,13 @@ public class SockServer {
 					response = testField(request, "type", null);
 					if (!response.getBoolean("ok")) {    // no "type" header provided
 						response = noType(request);
-						writeOut(response);
+						writeOut(response, dos);
 						continue;
 					}
 					response = testField(request, "status", null);
 					if (!response.getBoolean("ok")) {    // no "type" header provided
 						response = noType(request);
-						writeOut(response);
+						writeOut(response, dos);
 						continue;
 					}
 
@@ -156,7 +156,7 @@ public class SockServer {
 						JSONObject test = testField(request, "input", "input");
 						if (!test.getBoolean("ok")) {
 							response = noType(request);
-							writeOut(response);
+							writeOut(response, dos);
 							continue;
 						}
 
@@ -180,7 +180,8 @@ public class SockServer {
 							}
 						} else if (input.equals("next")) {
 							nextIndex();
-							direction = 1;
+							direction = rdg.nextInt(1,4);
+							caIndex = rdg.nextInt(1, currentAnswer.length);
 							response = fetchImage(currentAnswer[caIndex], direction, response);
 							System.out.println("Fetched new set of images. Answer: " + currentAnswer[caIndex]);
 						} else if (input.equals("gover!revog")) {
@@ -462,13 +463,21 @@ public class SockServer {
 		return new JSONObject();
 	}
 
-	private static void writeOut(JSONObject res) {
+	private static void writeOut(JSONObject response, DataOutputStream dos) {
+		System.out.println("Sending response");
+		if (!response.has("data")) {
+			System.out.println(response);
+		} else {
+			System.out.println("sent response, data too big (image) to print to console");
+		}
 		try {
-			os.writeUTF(res.toString());  //has to be JSON format.
-			// make sure it wrote and doesn't get cached in a buffer
-			os.flush();
-
-		} catch(Exception e) {e.printStackTrace();}
+			byte[] msg2send = convert2Bytes(response);
+			dos.writeInt(msg2send.length);
+			dos.write(msg2send);
+			dos.flush();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 
 	}
 
