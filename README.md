@@ -237,6 +237,8 @@ Replace value for "input" with any input. This will be considered a guess.
 
 ## Robust (e)
 The protocol here is very simple, yet robust. Requests will always have a "type". 
+if no TYPE or STATUS is included within the request, a response will be sent back giving a proper message saying what it is missing.
+For example...
 - If the request is not a JSONObject, a return message will return explain the request must be a JSONObject.
 - If no type field is given, a message will return explaining that the request must have a type
 - If a unrecognized type is given, a message will return saying the value is not recognized. 
