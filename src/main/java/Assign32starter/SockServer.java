@@ -181,7 +181,7 @@ public class SockServer {
 						} else if (input.equals("next")) {
 							nextIndex();
 							direction = rdg.nextInt(1,4);
-							caIndex = rdg.nextInt(1, currentAnswer.length);
+							//caIndex = rdg.nextInt(1, currentAnswer.length-1);
 							response = fetchImage(currentAnswer[caIndex], direction, response);
 							System.out.println("Fetched new set of images. Answer: " + currentAnswer[caIndex]);
 						} else if (input.equals("gover!revog")) {
@@ -196,7 +196,7 @@ public class SockServer {
 							}
 						} else if (input.equals(currentAnswer[caIndex].toLowerCase())) {
 							nextIndex();
-							direction = 1;
+							direction = rdg.nextInt(1,4);
 							response = fetchImage(currentAnswer[caIndex], direction, response);
 							response.put("type", "+1");
 							streak++;
@@ -547,7 +547,7 @@ public class SockServer {
 	static void writeJSON() {
 
 		try {
-			FileWriter file = new FileWriter("resourcesServer/leaders.JSON");
+			FileWriter file = new FileWriter("resourcesServer/leaders.json");
 			file.write(returnArray().toString());
 			file.close();
 		} catch (Exception e) {

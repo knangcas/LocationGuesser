@@ -63,7 +63,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 		frame = new JFrame("Name The Place 2024!");
 		frame.getContentPane().setBackground(Color.WHITE);
 		frame.setLayout(new GridBagLayout());
-		frame.setMinimumSize(new Dimension(600, 750));
+		frame.setMinimumSize(new Dimension(700, 750));
 		frame.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
 
@@ -184,6 +184,7 @@ public class ClientGui implements Assign32starter.OutputPanel.EventHandlers {
 				if (name.equals("")) {
 					name = "Guest";
 				}
+
 				outputPanel.setInputText(name);
 				System.out.println("Player's name is " + name);
 				submitClicked();
