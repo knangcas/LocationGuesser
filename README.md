@@ -1,6 +1,10 @@
-# Assignment 3 Starter Code
 
-## Name The Place 2024
+
+# Name The Place 2024
+
+### Disclaimer
+
+This is a class project for distributed systems. 
 
 ## Description (a)
 
