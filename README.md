@@ -13,6 +13,21 @@ a POV image on the screen, and the user can type "left", "right" to turn 90 degr
 left or right as if they are in that exact spot. The user may also guess the location by typing in the location
 or simply skip by typing "next".
 
+## Screenshots
+
+![Screenshot1](https://github.com/knangcas/LocationGuesser/blob/main/Screenshots/ss7.png?raw=true)
+
+![Screenshot2](https://github.com/knangcas/LocationGuesser/blob/main/Screenshots/ss6.png?raw=true)
+
+![Screenshot3](https://github.com/knangcas/LocationGuesser/blob/main/Screenshots/ss5.png?raw=true)
+
+![Screenshot4](https://github.com/knangcas/LocationGuesser/blob/main/Screenshots/ss3.png?raw=true)
+
+![Screenshot5](https://github.com/knangcas/LocationGuesser/blob/main/Screenshots/ss2.png?raw=true)
+
+![Screenshot6](https://github.com/knangcas/LocationGuesser/blob/main/Screenshots/ss1.png?raw=true)
+
+
 ### How to run (c)
 
 1. Run server.
